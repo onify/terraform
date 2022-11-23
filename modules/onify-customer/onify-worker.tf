@@ -30,16 +30,6 @@ resource "kubernetes_stateful_set" "onify-worker" {
         container {
           image = "eu.gcr.io/onify-images/hub/api:${var.onify-worker_version}"
           name  = "onify-worker"
-          resources {
-            limits = {
-              cpu    = var.onify-worker_cpu_limit
-              memory = var.onify-worker_memory_limit
-            }
-            requests = {
-              cpu    = var.onify-worker_cpu_requests
-              memory = var.onify-worker_memory_requests
-            }
-          }
           port {
             name           = "onify-worker"
             container_port = 8181

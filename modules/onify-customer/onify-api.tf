@@ -43,16 +43,6 @@ resource "kubernetes_stateful_set" "onify-api" {
         container {
           image = "eu.gcr.io/onify-images/hub/api:${var.onify-api_version}"
           name  = "onfiy-api"
-          resources {
-            limits = {
-              cpu    = var.onify-api_cpu_limit
-              memory = var.onify-api_memory_limit
-            }
-            requests = {
-              cpu    = var.onify-api_cpu_requests
-              memory = var.onify-api_memory_requests
-            }
-          }
           port {
             name           = "onify-api"
             container_port = 8181
