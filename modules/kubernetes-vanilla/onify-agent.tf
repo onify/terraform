@@ -51,16 +51,6 @@ resource "kubernetes_stateful_set" "onify-agent" {
         container {
           image = "eu.gcr.io/onify-images/hub/agent-server:${var.onify-agent_version}"
           name  = "onfiy-agent"
-          resources {
-            limits = {
-              cpu    = var.onify-agent_cpu_limit
-              memory = var.onify-agent_memory_limit
-            }
-            requests = {
-              cpu    = var.onify-agent_cpu_requests
-              memory = var.onify-agent_memory_requests
-            }
-          }
           port {
             name           = "onify-agent"
             container_port = 8080
