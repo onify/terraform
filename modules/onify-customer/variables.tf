@@ -24,6 +24,9 @@ variable "onify-app_version" {
 variable "onify-api_external" {
     default = true
 }
+variable "onify-functions_external" {
+    default = true
+}
 variable "onify-agent_external" {
     default = true
 }
