@@ -13,7 +13,7 @@ resource "google_container_cluster" "primary" {
   networking_mode = "VPC_NATIVE"
   location = "${var.gce_region}-a"
   remove_default_node_pool = false
-  initial_node_count       = 1
+  #initial_node_count       = 1
 
   ip_allocation_policy {}
   network    = google_compute_network.vpc.name
