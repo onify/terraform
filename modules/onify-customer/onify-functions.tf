@@ -35,7 +35,7 @@ resource "kubernetes_stateful_set" "onify-functions" {
             container_port = 8282
           }
           dynamic "env" {
-            for_each = var.onify_default_envs
+            for_each = var.onify_functions_envs
             content {
               name  = env.key
               value = env.value

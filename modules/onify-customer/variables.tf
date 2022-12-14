@@ -158,3 +158,9 @@ variable "onify_worker_envs" {
     ONIFY_client_secret = "xxx"
   }
 }
+variable "onify_functions_envs" {
+    type = map(string)
+    default = {
+    NODE_ENV              = "production"
+  }
+}
