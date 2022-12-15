@@ -74,27 +74,17 @@ resource "kubernetes_ingress_v1" "onify-functions" {
     name      = "${local.client_code}-${local.onify_instance}-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
-      "kubernetes.io/ingress.class" = "public"
-      "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
-      "nginx.ingress.kubernetes.io/connection-proxy-header" = "upgrade"
-      "nginx.ingress.kubernetes.io/proxy-body-size" = "555m"
-      "nginx.ingress.kubernetes.io/proxy-send-timeout" = "5555"
-      "nginx.ingress.kubernetes.io/proxy-read-timeout" = "5555"
-      "nginx.ingress.kubernetes.io/configuration-snippet" = <<APA
-        proxy_set_header Upgrade "websockets";
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_socket_keepalive on;
-        APA
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
     }
   }
   spec {
     tls {
-      hosts = ["functions.${var.external-dns-domain}"]
+      hosts = ["${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"]
       secret_name = "tls-secret-api"
     }
     ingress_class_name = "public"
     rule {
-      host = "functions.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"
       http {
         path {
           backend {

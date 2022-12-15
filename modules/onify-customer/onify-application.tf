@@ -95,21 +95,17 @@ resource "kubernetes_ingress_v1" "onify-app" {
     name      = "${local.client_code}-${local.onify_instance}-app"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
-      "kubernetes.io/ingress.class" = "public"
-      "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
-    #   "traefik.ingress.kubernetes.io/router.entrypoints"      = "websecure"
-    #   "traefik.ingress.kubernetes.io/router.tls"              = "true"
-    #   "traefik.ingress.kubernetes.io/router.tls.certresolver" = var.ssl_staging ? "staging" : "default"
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
     }
   }
   spec {
       tls {
-      hosts = ["app.${var.external-dns-domain}"]
+      hosts = ["${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"]
       secret_name = "tls-secret-app"
     }
     ingress_class_name = "public"
     rule {
-    host = "app.${var.external-dns-domain}"
+    host = "${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"
       http {
         path {
           backend {

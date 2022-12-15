@@ -103,33 +103,17 @@ resource "kubernetes_ingress_v1" "onify-agent" {
     name      = "${local.client_code}-${local.onify_instance}-agent"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
-      "kubernetes.io/ingress.class" = "public"
-      "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
-      #"nginx.ingress.kubernetes.io/enable-rewrite-log" = "true"
-      #"nginx.ingress.kubernetes.io/proxy-http-version" = "1.1"
-      #"nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
-      #"nginx.ingress.kubernetes.io/connection-proxy-header" = "Upgrade"
-      # "nginx.ingress.kubernetes.io/client-body-buffer-size" = "1m"
-      # "nginx.ingress.kubernetes.io/proxy-body-size" = "10m"
-      # "nginx.ingress.kubernetes.io/proxy-send-timeout" = "3600"
-      # "nginx.ingress.kubernetes.io/proxy-read-timeout" = "3600"
-      # "nginx.ingress.kubernetes.io/proxy-connect-timeout" = "3600"
-      # "nginx.ingress.kubernetes.io/send-timeout" = "3600"
-      # "nginx.ingress.kubernetes.io/ssl-redirect" = "false"
-      #"nginx.ingress.kubernetes.io/configuration-snippet" = <<APA
-      #  proxy_set_header Connection $connection_upgrade;
-      #  proxy_set_header Upgrade $http_upgrade;
-      #  APA
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
     }
   }
   spec {
     tls {
-      hosts = ["agent.${var.external-dns-domain}"]
+      hosts = ["${local.client_code}-${local.onify_instance}-agent.${var.external-dns-domain}"]
       secret_name = "tls-secret-agent"
     }
     ingress_class_name = "public"
     rule {
-      host = "agent.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-agent.${var.external-dns-domain}"
       http {
         path {
           backend {

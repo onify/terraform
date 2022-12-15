@@ -2,7 +2,9 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
-
+variable "tls" {
+    default = "prod"
+}
 variable "deployment_replicas" {
     default = 1
 }
