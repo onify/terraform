@@ -166,3 +166,38 @@ resource "kubernetes_stateful_set" "elasticsearch" {
   # }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_persistent_volume.local]
 }
+resource "kubernetes_ingress_v1" "onify-elasticsearch" {
+  count                  = var.elasticsearch_external ? 1 : 0
+  wait_for_load_balancer = false
+  metadata {
+    name      = "${local.client_code}-${local.onify_instance}-elasticsearch"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+    annotations = {
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
+    }
+  }
+  spec {
+    tls {
+      hosts = ["${local.client_code}-${local.onify_instance}-elasticsearch.${var.external-dns-domain}"]
+      secret_name = "tls-secret-elasticsearch-${var.tls}"
+    }
+    ingress_class_name = "nginx"
+    rule {
+      host = "${local.client_code}-${local.onify_instance}-elasticsearch.${var.external-dns-domain}"
+      http {
+        path {
+          backend {
+            service {
+            name = "${local.client_code}-${local.onify_instance}-elasticsearch"
+            port {
+              number = 9200
+            }
+            }
+          }
+        }
+      }
+    }
+  }
+  depends_on = [kubernetes_namespace.customer_namespace]
+}
+
