@@ -125,14 +125,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
             mount_path = "/usr/share/elasticsearch/data"
           }
           
-          resources {
-            limits = {
-              memory = var.elasticsearch_memory_limit
-            }
-            # requests = {
-            #   memory = var.elasticsearch_memory_requests
-            # }
-          }
           # liveness_probe {
           #   http_get {
           #     path   = "/_cluster/health"
