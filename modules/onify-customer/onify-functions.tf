@@ -1,26 +1,26 @@
 resource "kubernetes_stateful_set" "onify-functions" {
   metadata {
-    name      = "onify-functions"
+    name      = "${local.client_code}-${local.onify_instance}-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
-      app  = "onify-functions"
-      name = "onify-functions"
+      app  = "${local.client_code}-${local.onify_instance}-functions"
+      name = "${local.client_code}-${local.onify_instance}-functions"
     }
   }
   spec {
-    service_name = "onify-functions"
+    service_name = "${local.client_code}-${local.onify_instance}-functions"
     replicas     = var.deployment_replicas
     selector {
       match_labels = {
-        app  = "onify-functions"
-        task = "onify-functions"
+        app  = "${local.client_code}-${local.onify_instance}-functions"
+        task = "${local.client_code}-${local.onify_instance}-functions"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "onify-functions"
-          task = "onify-functions"
+          app  = "${local.client_code}-${local.onify_instance}-functions"
+          task = "${local.client_code}-${local.onify_instance}-functions"
         }
       }
       spec {
@@ -31,7 +31,7 @@ resource "kubernetes_stateful_set" "onify-functions" {
           image = "eu.gcr.io/onify-images/hub/functions:latest"
           name  = "onfiy-api"
           port {
-            name           = "onify-functions"
+            name           = "${local.client_code}-${local.onify_instance}-functions"
             container_port = 8282
           }
           dynamic "env" {
@@ -50,16 +50,16 @@ resource "kubernetes_stateful_set" "onify-functions" {
 
 resource "kubernetes_service" "onify-functions" {
   metadata {
-    name      = "onify-functions"
+    name      = "${local.client_code}-${local.onify_instance}-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
   }
   spec {
     selector = {
-      app  = "onify-functions"
-      task = "onify-functions"
+      app  = "${local.client_code}-${local.onify_instance}-functions"
+      task = "${local.client_code}-${local.onify_instance}-functions"
     }
     port {
-      name     = "onify-functions"
+      name     = "${local.client_code}-${local.onify_instance}-functions"
       port     = 8282
       protocol = "TCP"
     }
