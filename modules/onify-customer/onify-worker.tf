@@ -36,7 +36,7 @@ resource "kubernetes_stateful_set" "onify-worker" {
           }
           args = ["worker"]
           dynamic "env" {
-            for_each = var.onify_worker_envs
+            for_each = var.onify_api_envs
             content {
               name  = env.key
               value = env.value

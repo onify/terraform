@@ -3,7 +3,7 @@ resource "helm_release" "cert_manager" {
   repository = "https://charts.jetstack.io"
   chart = "cert-manager"
   create_namespace = true
-  version    = "v1.9.1"
+  version    = "v1.10.1"
   namespace  = "cert-manager"
   provisioner "local-exec" {
         command = "sleep 10"
@@ -16,6 +16,14 @@ resource "helm_release" "cert_manager" {
     name  = "installCRDs"
     value = true 
   }
+  #set {
+  #  name = "ingress-class"
+  #  value = "public"
+  #}
+  #set {
+  #  name = "ingress-class-by-name"
+  #  value = "true"
+  #}
 }
 
 
@@ -36,11 +44,11 @@ spec:
     solvers:
     - http01:
         ingress:
-          class: nginx
+          class: nginx 
           ingressTemplate:
             metadata:
               annotations:
-                kubernetes.io/ingress.class: "public"
+                kubernetes.io/ingress.class: "nginx"
 
 YAML
 }
@@ -66,6 +74,6 @@ spec:
           ingressTemplate:
             metadata:
               annotations:
-                kubernetes.io/ingress.class: "public"
+                kubernetes.io/ingress.class: "nginx"
 YAML
 }

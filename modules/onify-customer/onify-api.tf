@@ -104,11 +104,11 @@ resource "kubernetes_ingress_v1" "onify-api" {
   spec {
     tls {
       hosts = ["${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"]
-      secret_name = "tls-secret-api"
+      secret_name = "tls-secret-api-${var.tls}"
     }
-    ingress_class_name = "public"
+    ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}" 
       http {
         path {
           backend {

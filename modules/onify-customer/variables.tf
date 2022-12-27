@@ -2,6 +2,9 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
+variable "custom-hostname" {
+    default = false 
+}
 variable "tls" {
     default = "prod"
 }
@@ -149,15 +152,6 @@ variable "onify_app_envs" {
     ONIFY_api_externalUrl = "/api/v2"
     ONIFY_disableAdminEndpoints = true
     ONIFY_api_admintoken = "xx"
-  }
-}
-variable "onify_worker_envs" {
-    type = map(string)
-    default = {
-    ONIFY_adminUser_password = "xx"
-    ONIFY_apiTokens_app_secret = "xx"
-    ONIFY_worker_cleanupInterval = 300
-    ONIFY_client_secret = "xxx"
   }
 }
 variable "onify_functions_envs" {

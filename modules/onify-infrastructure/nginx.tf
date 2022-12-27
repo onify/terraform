@@ -5,8 +5,8 @@ resource "helm_release" "nginx" {
   create_namespace = true
   namespace  = "ingress"
 
-  set {
-    name  = "controller.ingressClassResource.name"
-    value = "public"
-  }
+  #  set {
+  #  name  = "controller.ingressClassResource.name"
+  #  value = "public"
+  #}
 }

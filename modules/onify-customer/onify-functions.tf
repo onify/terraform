@@ -80,9 +80,9 @@ resource "kubernetes_ingress_v1" "onify-functions" {
   spec {
     tls {
       hosts = ["${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"]
-      secret_name = "tls-secret-api"
+      secret_name = "tls-secret-functions-${var.tls}"
     }
-    ingress_class_name = "public"
+    #ingress_class_name = "public"
     rule {
       host = "${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"
       http {

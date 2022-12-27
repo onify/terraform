@@ -99,11 +99,11 @@ resource "kubernetes_ingress_v1" "onify-app" {
     }
   }
   spec {
-      tls {
+    tls {
       hosts = ["${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"]
-      secret_name = "tls-secret-app"
+      secret_name = "tls-secret-app-${var.tls}"
     }
-    ingress_class_name = "public"
+    ingress_class_name = "nginx"
     rule {
     host = "${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"
       http {
