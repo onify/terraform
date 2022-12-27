@@ -31,7 +31,7 @@ resource "kubernetes_stateful_set" "onify-functions" {
           image = "eu.gcr.io/onify-images/hub/functions:latest"
           name  = "onfiy-api"
           port {
-            name           = "${local.client_code}-${local.onify_instance}-functions"
+            name           = "onify-functions"
             container_port = 8282
           }
           dynamic "env" {
