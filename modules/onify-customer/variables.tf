@@ -2,6 +2,10 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
+variable "custom_hostname" {
+    type = string
+    default = null
+}
 variable "elasticsearch_external" {
     default = false
 }
