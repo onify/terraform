@@ -5,8 +5,12 @@ resource "helm_release" "nginx" {
   create_namespace = true
   namespace  = "ingress"
 
-   set {
+  set {
     name  = "controller.config.proxy-body-size"
     value = "100m"
+  }
+  set {
+    name  = "controller.config.enable-underscores-in-headers"
+    value = "true"
   }
 }
