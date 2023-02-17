@@ -119,27 +119,9 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
             service {
               name = "${local.client_code}-${local.onify_instance}-app-helix"
             port {
-              number = 3000
+              number = 80 
             }
             } 
-          }
-        }
-      }
-    }
-    dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
-      content {
-        host = "${var.custom_hostname}.${var.external-dns-domain}"
-        http {
-          path {
-          backend {
-            service {
-              name = "${local.client_code}-${local.onify_instance}-app-helix"
-            port {
-              number = 80
-                }
-              } 
-            }
           }
         }
       }
