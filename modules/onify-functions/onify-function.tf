@@ -1,3 +1,14 @@
+resource "kubernetes_config_map" "functions" {
+  metadata {
+    name      = "${var.client_code}-${var.client_instance}-functions"
+    namespace = "${var.client_code}-${var.client_instance}"
+  }
+
+  data = {
+    WHOAMI_NAME = "APAN123"
+  }
+}
+
 resource "kubernetes_stateful_set" "function" {
   metadata {
     name      = "${var.client_code}-${var.client_instance}-${var.name}"
@@ -9,6 +20,7 @@ resource "kubernetes_stateful_set" "function" {
   }
   spec {
     service_name = "${var.client_code}-${var.client_instance}-${var.name}"
+    replicas     = 2
     selector {
       match_labels = {
         app  = "${var.client_code}-${var.client_instance}-${var.name}"
@@ -38,6 +50,11 @@ resource "kubernetes_stateful_set" "function" {
             content {
               name  = env.key
               value = env.value
+            }
+          }
+          env_from {
+            config_map_ref {
+              name = "${var.client_code}-${var.client_instance}-functions"
             }
           }
       }
