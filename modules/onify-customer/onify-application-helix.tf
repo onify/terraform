@@ -40,11 +40,11 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/app:latest"
+          image = "traefik/whoami:latest"
           name  = "onfiy-app-helix"
           port {
             name           = "onify-app-helix"
-            container_port = 3000
+            container_port = 80
           }
           dynamic "env" {
             for_each = var.onify_app_helix_envs
@@ -81,7 +81,7 @@ resource "kubernetes_service" "onify-app-helix" {
     }
     port {
       name     = "onify-app-helix"
-      port     = 3000
+      port     = 80
       protocol = "TCP"
     }
     type = "NodePort"
@@ -136,7 +136,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
             service {
               name = "${local.client_code}-${local.onify_instance}-app-helix"
             port {
-              number = 3000
+              number = 80
                 }
               } 
             }
