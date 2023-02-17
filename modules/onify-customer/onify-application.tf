@@ -124,6 +124,17 @@ resource "kubernetes_ingress_v1" "onify-app" {
             } 
           }
         }
+        path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-app-helix"
+            port {
+              number = 3000
+            }
+            } 
+          }
+          path = "/app/*"
+        }
       }
     }
     dynamic "rule" {
