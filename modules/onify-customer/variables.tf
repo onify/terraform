@@ -158,6 +158,11 @@ variable "onify_app_envs" {
     ONIFY_api_admintoken = "xx"
   }
 }
+variable "onify_app_helix_envs" {
+    type = map(string)
+    default = {
+  }
+}
 variable "onify_functions_envs" {
     type = map(string)
     default = {

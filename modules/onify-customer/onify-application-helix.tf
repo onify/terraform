@@ -40,14 +40,14 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/app:${var.onify-app_version}"
-          name  = "onfiy-app"
+          image = "eu.gcr.io/onify-images/hub/helix:latest"
+          name  = "onfiy-app-helix"
           port {
             name           = "onify-app-helix"
             container_port = 3000
           }
           dynamic "env" {
-            for_each = var.onify_app_envs
+            for_each = var.onify_app_helix_envs
             content {
               name  = env.key
               value = env.value
