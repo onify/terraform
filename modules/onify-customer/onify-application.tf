@@ -122,8 +122,6 @@ resource "kubernetes_ingress_v1" "onify-app" {
               number = 3000
             }
             } 
-            path = "/"
-            path_type = "Prefix" 
           }
         }
         path {
@@ -135,9 +133,6 @@ resource "kubernetes_ingress_v1" "onify-app" {
             }
             } 
           }
-          path = "/app"
-          path_type = "Prefix" 
-        
         }
       }
     }
