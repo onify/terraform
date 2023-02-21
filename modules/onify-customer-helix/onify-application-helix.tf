@@ -97,7 +97,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
+      #"nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
     }
   }
   spec {
@@ -131,13 +131,13 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-app-helix"
+              name = "${local.client_code}-${local.onify_instance}-app"
             port {
-              number = 4000
+              number = 3000
             }
             }
           }
-            path = "/app(/|$)(.*)"
+            path = "/"
             path_type = "Prefix"
         }
         path {
@@ -149,7 +149,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
             }
             }
           }
-            path = "/"
+            path = "/helix"
             path_type = "Prefix"
         }
       }
