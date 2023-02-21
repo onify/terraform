@@ -40,11 +40,12 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
           name = "onify-regcred"
         }
         container {
-          image = "traefik/whoami:latest"
+          image = "eu.gcr.io/onify-images/hub/helix:latest"
+          #image = "traefik/whoami:latest"
           name  = "onfiy-app-helix"
           port {
             name           = "onify-app-helix"
-            container_port = 80
+            container_port = 4000
           }
           dynamic "env" {
             for_each = var.onify_app_helix_envs
@@ -81,10 +82,10 @@ resource "kubernetes_service" "onify-app-helix" {
     }
     port {
       name     = "onify-app-helix"
-      port     = 80
+      port     = 4000 
       protocol = "TCP"
     }
-    type = "NodePort"
+    #type = "NodePort"
   }
   depends_on = [kubernetes_namespace.customer_namespace]
 }
@@ -96,32 +97,77 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
+      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
     }
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-app-helix.${var.external-dns-domain}"]
-      secret_name = "tls-secret-app-helix-${var.tls}"
+      hosts = ["${local.client_code}-${local.onify_instance}.${var.external-dns-domain}"]
+      secret_name = "tls-secret-app-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname!= null ? [1] : []
       content {
         hosts = ["${var.custom_hostname}.${var.external-dns-domain}"]
-        secret_name = "tls-secret-app-helix-${var.tls}-custom"
+        secret_name = "tls-secret-app-${var.tls}-custom"
       }
     }
     ingress_class_name = "nginx"
     rule {
-    host = "${local.client_code}-${local.onify_instance}-app-helix.${var.external-dns-domain}"
+    host = "${local.client_code}-${local.onify_instance}.${var.external-dns-domain}"
       http {
+        path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-api"
+            port {
+              number = 8181
+            }
+            }
+          }
+            path = "/api"
+            path_type = "Prefix"
+        }
         path {
           backend {
             service {
               name = "${local.client_code}-${local.onify_instance}-app-helix"
             port {
-              number = 80 
+              number = 4000
             }
-            } 
+            }
+          }
+            path = "/app(/|$)(.*)"
+            path_type = "Prefix"
+        }
+        path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-app-helix"
+            port {
+              number = 4000
+            }
+            }
+          }
+            path = "/"
+            path_type = "Prefix"
+        }
+      }
+    }
+    dynamic "rule" {
+      for_each = var.custom_hostname!= null ? [1] : []
+      content {
+        host = "${var.custom_hostname}.${var.external-dns-domain}"
+        http {
+          path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-app-helix"
+            port {
+              number = 4000
+                }
+              }
+            }
           }
         }
       }
@@ -129,3 +175,4 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
   }
   depends_on = [kubernetes_namespace.customer_namespace]
 }
+
