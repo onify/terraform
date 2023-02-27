@@ -126,18 +126,6 @@ resource "kubernetes_ingress_v1" "onify-app" {
             path = "/"
             path_type = "Prefix" 
         }
-        path {
-          backend {
-            service {
-              name = "${local.client_code}-${local.onify_instance}-app-helix"
-            port {
-              number = 80
-            }
-            } 
-          }
-            path = "/app"
-            path_type = "Prefix" 
-        }
       }
     }
     dynamic "rule" {
