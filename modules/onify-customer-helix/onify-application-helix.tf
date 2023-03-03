@@ -97,6 +97,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
+      #"nginx.ingress.kubernetes.io/use-regex" = "true"
       #"nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
     }
   }
@@ -116,18 +117,18 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
     rule {
     host = "${local.client_code}-${local.onify_instance}.${var.external-dns-domain}"
       http {
-        path {
-          backend {
-            service {
-              name = "${local.client_code}-${local.onify_instance}-api"
-            port {
-              number = 8181
-            }
-            }
-          }
-            path = "/api"
-            path_type = "Prefix"
-        }
+          # path {
+          #          backend {
+          #            service {
+          #              name = "${local.client_code}-${local.onify_instance}-api"
+          #            port {
+          #              number = 8181
+          #            }
+          #            }
+          #          }
+          #            path = "/api"
+          #            path_type = "Prefix"
+          #        }
         path {
           backend {
             service {

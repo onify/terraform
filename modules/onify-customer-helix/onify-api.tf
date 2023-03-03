@@ -91,62 +91,62 @@ resource "kubernetes_service" "onify-api" {
 }
 
 
-#resource "kubernetes_ingress_v1" "onify-api" {
-#  count                  = var.onify-api_external ? 1 : 0
-#  wait_for_load_balancer = false
-#  metadata {
-#    name      = "${local.client_code}-${local.onify_instance}-api"
-#    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
-#    annotations = {
-#      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
-#    }
-#  }
-#  spec {
-#    tls {
-#      hosts = ["${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"]
-#      secret_name = "tls-secret-api-${var.tls}"
-#    }
-#    dynamic "tls" {
-#      for_each = var.custom_hostname!= null ? [1] : []
-#      content {
-#        hosts = ["${var.custom_hostname}-api.${var.external-dns-domain}"]
-#        secret_name = "tls-secret-api-${var.tls}-custom"
-#      }
-#    }
-#    ingress_class_name = "nginx"
-#    rule {
-#      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}" 
-#      http {
-#        path {
-#          backend {
-#            service {
-#            name = "${local.client_code}-${local.onify_instance}-api"
-#            port {
-#              number = 8181
-#            }
-#            }
-#          }
-#        }
-#      }
-#    }
-#    dynamic "rule" {
-#      for_each = var.custom_hostname!= null ? [1] : []
-#      content {
-#        host = "${var.custom_hostname}-api.${var.external-dns-domain}"
-#        http {
-#          path {
-#          backend {
-#            service {
-#              name = "${local.client_code}-${local.onify_instance}-api"
-#            port {
-#              number = 8181
-#                }
-#              }
-#            }
-#          }
-#        }
-#      }
-#    }
-#  }
-#  depends_on = [kubernetes_namespace.customer_namespace]
-#}
+resource "kubernetes_ingress_v1" "onify-api" {
+  count                  = var.onify-api_external ? 1 : 0
+  wait_for_load_balancer = false
+  metadata {
+    name      = "${local.client_code}-${local.onify_instance}-api"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+    annotations = {
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
+    }
+  }
+  spec {
+    tls {
+      hosts = ["${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"]
+      secret_name = "tls-secret-api-${var.tls}"
+    }
+    dynamic "tls" {
+      for_each = var.custom_hostname!= null ? [1] : []
+      content {
+        hosts = ["${var.custom_hostname}-api.${var.external-dns-domain}"]
+        secret_name = "tls-secret-api-${var.tls}-custom"
+      }
+    }
+    ingress_class_name = "nginx"
+    rule {
+      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}" 
+      http {
+        path {
+          backend {
+            service {
+            name = "${local.client_code}-${local.onify_instance}-api"
+            port {
+              number = 8181
+            }
+            }
+          }
+        }
+      }
+    }
+    dynamic "rule" {
+      for_each = var.custom_hostname!= null ? [1] : []
+      content {
+        host = "${var.custom_hostname}-api.${var.external-dns-domain}"
+        http {
+          path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-api"
+            port {
+              number = 8181
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  depends_on = [kubernetes_namespace.customer_namespace]
+}
