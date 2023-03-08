@@ -40,7 +40,7 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/helix:latest"
+          image = "eu.gcr.io/onify-images/hub/helix:${var.onify-helix_version}"
           #image = "traefik/whoami:latest"
           name  = "onfiy-app-helix"
           port {

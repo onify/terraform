@@ -31,6 +31,9 @@ variable "onify-api_version" {
 variable "onify-worker_version" {
     default = "latest"
 }
+variable "onify-helix_version" {
+    default = "latest"
+}
 variable "onify-app_version" {
     default = "latest"
 }
