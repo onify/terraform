@@ -98,6 +98,7 @@ resource "kubernetes_ingress_v1" "onify-app" {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
       "nginx.ingress.kubernetes.io/proxy-read-timeout" = "300"
       "nginx.ingress.kubernetes.io/proxy-send-timeout" = "300"
+      "nginx.ingress.kubernetes.io/proxy-body-size" = "100m"
     }
   }
   spec {
