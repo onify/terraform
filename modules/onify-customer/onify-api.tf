@@ -106,7 +106,7 @@ resource "kubernetes_ingress_v1" "onify-api" {
   spec {
     tls {
       hosts = ["${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"]
-      secret_name = length(regexall("custom", var.tls)) > 0 ? var.tls : "tls-secret-app-${var.tls}"
+      secret_name = var.onify-api_tls != null ? var.onify-api_tls : "tls-secret-api-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname!= null ? [1] : []
