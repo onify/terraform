@@ -3,16 +3,20 @@ locals {
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
 variable "onfify-worker_tls" {
-    default = ""
+    type = string
+    default = null
 }
 variable "onfify-agent_tls" {
-    default = ""
+    type = string
+    default = null
 }
 variable "onfify-api_tls" {
-    default = ""
+    type = string
+    default = null
 }
 variable "onfify-app_tls" {
-    default = ""
+    type = string
+    default = null
 }
 variable "custom_hostname" {
     type = string
