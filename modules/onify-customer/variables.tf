@@ -2,19 +2,19 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
-variable "onfify-worker_tls" {
+variable "onify-worker_tls" {
     type = string
     default = null
 }
-variable "onfify-agent_tls" {
+variable "onify-agent_tls" {
     type = string
     default = null
 }
-variable "onfify-api_tls" {
+variable "onify-api_tls" {
     type = string
     default = null
 }
-variable "onfify-app_tls" {
+variable "onify-app_tls" {
     type = string
     default = null
 }
