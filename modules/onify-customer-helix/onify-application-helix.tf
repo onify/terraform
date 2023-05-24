@@ -162,16 +162,30 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
       content {
         host = "${var.custom_hostname}.${var.external-dns-domain}"
         http {
-          path {
+        path {
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-app"
+            port {
+              number = 3000
+            }
+            }
+          }
+            path = "/"
+            path_type = "Prefix"
+        }
+        path {
           backend {
             service {
               name = "${local.client_code}-${local.onify_instance}-app-helix"
             port {
               number = 4000
-                }
-              }
+            }
             }
           }
+            path = "/helix"
+            path_type = "Prefix"
+        }
         }
       }
     }
