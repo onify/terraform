@@ -112,10 +112,10 @@ resource "kubernetes_ingress_v1" "onify-agent" {
       secret_name = "tls-secret-agent-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${var.custom_hostname}-api.${var.external-dns-domain}"]
-        secret_name = "tls-secret-agent-${var.tls}-custom"
+        hosts = ["${tls.value}-api.${var.external-dns-domain}"]
+        secret_name = "tls-secret-agent-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
@@ -137,9 +137,9 @@ resource "kubernetes_ingress_v1" "onify-agent" {
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
-        host = "${var.custom_hostname}-agent.${var.external-dns-domain}"
+        host = "${rule.value}-agent.${var.external-dns-domain}"
         http {
           path {
           backend {

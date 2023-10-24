@@ -7,7 +7,7 @@ variable "helix" {
   type = bool
 }
 variable "custom_hostname" {
-    type = string
+    type = list(string)
     default = null
 }
 variable "elasticsearch_external" {

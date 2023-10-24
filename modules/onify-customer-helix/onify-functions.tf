@@ -83,9 +83,9 @@ resource "kubernetes_ingress_v1" "onify-functions" {
       secret_name = "tls-secret-functions-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname): []
       content {
-        hosts = ["${var.custom_hostname}-functions.${var.external-dns-domain}"]
+        hosts = ["${tls.value}-functions.${var.external-dns-domain}"]
         secret_name = "tls-secret-functions-${var.tls}-custom"
       }
     }
@@ -108,7 +108,7 @@ resource "kubernetes_ingress_v1" "onify-functions" {
     dynamic "rule" {
       for_each = var.custom_hostname!= null ? [1] : []
       content {
-        host = "${var.custom_hostname}-functions.${var.external-dns-domain}"
+        host = "${rule.value}-functions.${var.external-dns-domain}"
         http {
           path {
           backend {

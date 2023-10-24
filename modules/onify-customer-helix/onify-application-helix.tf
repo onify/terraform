@@ -99,8 +99,6 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
       "nginx.ingress.kubernetes.io/proxy-read-timeout" = "300"
       "nginx.ingress.kubernetes.io/proxy-send-timeout" = "300"
-      #"nginx.ingress.kubernetes.io/use-regex" = "true"
-      #"nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
     }
   }
   spec {
@@ -109,28 +107,17 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
       secret_name = "tls-secret-app-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${var.custom_hostname}.${var.external-dns-domain}"]
-        secret_name = "tls-secret-app-${var.tls}-custom"
+        #hosts = ["${var.custom_hostname}.${var.external-dns-domain}"]
+        hosts = ["${tls.value}.${var.external-dns-domain}"] #["${var.custom_hostname}.${var.external-dns-domain}"]
+        secret_name = "tls-secret-app-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
     rule {
     host = "${local.client_code}-${local.onify_instance}.${var.external-dns-domain}"
       http {
-          # path {
-          #          backend {
-          #            service {
-          #              name = "${local.client_code}-${local.onify_instance}-api"
-          #            port {
-          #              number = 8181
-          #            }
-          #            }
-          #          }
-          #            path = "/api"
-          #            path_type = "Prefix"
-          #        }
         path {
           backend {
             service {
@@ -158,9 +145,10 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        host = "${var.custom_hostname}.${var.external-dns-domain}"
+        #host = "${var.custom_hostname}.${var.external-dns-domain}"
+        host = "${rule.value}.${var.external-dns-domain}" #"${each.value}.${var.external-dns-domain}"
         http {
         path {
           backend {
