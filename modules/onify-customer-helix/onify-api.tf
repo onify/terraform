@@ -132,7 +132,7 @@ resource "kubernetes_ingress_v1" "onify-api" {
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
         host = "${rule.value}-api.${var.external-dns-domain}"
         http {
