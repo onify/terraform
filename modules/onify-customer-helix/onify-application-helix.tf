@@ -41,7 +41,6 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
         }
         container {
           image = "${var.onify-helix_image}"
-          #image = "traefik/whoami:latest"
           name  = "onfiy-app-helix"
           port {
             name           = "onify-app-helix"
@@ -59,9 +58,9 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
               name = "${local.client_code}-${local.onify_instance}-app-helix"
             }
           }
-
         }
-      }
+	node_name = var.node != null ? var.node : null 
+	}
     }
   }
   depends_on = [kubernetes_namespace.customer_namespace]

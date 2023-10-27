@@ -2,6 +2,9 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
+variable "node" {
+    default = null 
+}
 variable "helix" {
   default = false
   type = bool
