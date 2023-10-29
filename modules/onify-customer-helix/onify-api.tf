@@ -60,6 +60,7 @@ resource "kubernetes_stateful_set" "onify-api" {
             }
           }
         }
+	node_name = var.node != null ? var.node : null
       }
     }
   }
