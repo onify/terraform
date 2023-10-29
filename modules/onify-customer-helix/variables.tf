@@ -2,7 +2,7 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
-variable "node" {
+variable "kubernetes_node_api_worker" {
     default = null 
 }
 variable "helix" {

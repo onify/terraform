@@ -48,7 +48,7 @@ resource "kubernetes_stateful_set" "onify-worker" {
             }
           }
         }
-        node_name = var.node != null ? var.node : null
+        node_name = var.kubernetes_node_api_worker != null ? var.node : null
       }
     }
   }

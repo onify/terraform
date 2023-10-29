@@ -59,7 +59,6 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
             }
           }
         }
-	node_name = var.node != null ? var.node : null 
 	}
     }
   }
