@@ -11,6 +11,9 @@ resource "kubernetes_secret" "docker-onify" {
     "eu.gcr.io": {
       "auth": "${base64encode("_json_key:${file("${var.gcr_registry_keyfile}")}")}"
     }
+    "ghcr.io": {
+      "auth": "${base64encode("${var.github_username}:${var.github_pat}")}"
+    }
   }
 }
 DOCKER
