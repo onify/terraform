@@ -2,10 +2,10 @@ locals {
     client_code = var.onify_api_envs.ONIFY_client_code
     onify_instance = var.onify_api_envs.ONIFY_client_instance
 }
-variable "github_pat" {
+variable "ghcr_registry_password" {
     default = "1234"
 }
-variable "github_username" {
+variable "ghcr_registry_username" {
     default = "onify"
 }
 variable "onify-worker_tls" {

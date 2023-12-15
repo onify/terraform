@@ -12,7 +12,7 @@ resource "kubernetes_secret" "docker-onify" {
       "auth": "${base64encode("_json_key:${file("${var.gcr_registry_keyfile}")}")}"
     },
     "ghcr.io": {
-      "auth": "${base64encode("${var.github_username}:${var.github_pat}")}"
+      "auth": "${base64encode("${var.ghcr_registry_username}:${var.ghcr_registry_password}")}"
     }
   }
 }
