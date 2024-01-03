@@ -1,6 +1,6 @@
-resource "kubernetes_config_map" "onify-app" {
+resource "kubernetes_config_map" "onify-app-hub" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app"
+    name      = "${local.client_code}-${local.onify_instance}-app-hub"
     namespace = "${local.client_code}-${local.onify_instance}"
   }
 
@@ -54,7 +54,7 @@ resource "kubernetes_stateful_set" "onify-app" {
           }
           env_from {
             config_map_ref {
-              name = "${local.client_code}-${local.onify_instance}-app"
+              name = "${local.client_code}-${local.onify_instance}-app-hub"
             }
           }
 
@@ -62,7 +62,7 @@ resource "kubernetes_stateful_set" "onify-app" {
       }
     }
   }
-  depends_on = [kubernetes_config_map.onify-app]
+  depends_on = [kubernetes_config_map.onify-app-hub]
 }
 
 resource "kubernetes_service" "onify-app" {
