@@ -28,7 +28,7 @@ resource "kubernetes_stateful_set" "onify-worker" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify-worker_image
+          image = "eu.gcr.io/onify-images/hub/api:${var.onify-worker_version}"
           name  = "onify-worker"
           port {
             name           = "onify-worker"
@@ -52,5 +52,5 @@ resource "kubernetes_stateful_set" "onify-worker" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }

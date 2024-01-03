@@ -8,7 +8,7 @@ resource "kubernetes_config_map" "onify-api" {
     ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://${local.client_code}-${local.onify_instance}-elasticsearch:9200"
     ONIFY_websockets_agent_url  = "ws://${local.client_code}-${local.onify_instance}-agent:8080/hub"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
 
 resource "kubernetes_stateful_set" "onify-api" {
@@ -41,13 +41,13 @@ resource "kubernetes_stateful_set" "onify-api" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify-api_image
+          image = "eu.gcr.io/onify-images/hub/api:${var.onify-api_version}"
           name  = "onfiy-api"
           port {
             name           = "onify-api"
             container_port = 8181
           }
-          dynamic "env" {
+           dynamic "env" {
             for_each = var.onify_api_envs
             content {
               name  = env.key
@@ -60,11 +60,11 @@ resource "kubernetes_stateful_set" "onify-api" {
             }
           }
         }
-        node_name = var.kubernetes_node_api_worker != null ? var.kubernetes_node_api_worker : null
+	node_name = var.kubernetes_node_api_worker != null ? var.kubernetes_node_api_worker : null
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
 
 resource "kubernetes_service" "onify-api" {
@@ -88,18 +88,18 @@ resource "kubernetes_service" "onify-api" {
     //type = "NodePort"
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
 
 
 resource "kubernetes_ingress_v1" "onify-api" {
-  count                  = var.onify-api_external && !var.vanilla ? 1 : 0
+  count                  = var.onify-api_external ? 1 : 0
   wait_for_load_balancer = false
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-api"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
-      "cert-manager.io/cluster-issuer"                 = "letsencrypt-${var.tls}"
+      "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
       "nginx.ingress.kubernetes.io/proxy-read-timeout" = "300"
       "nginx.ingress.kubernetes.io/proxy-send-timeout" = "300"
     }
@@ -118,31 +118,31 @@ resource "kubernetes_ingress_v1" "onify-api" {
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-api.${var.external-dns-domain}" 
       http {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-api"
-              port {
-                number = 8181
-              }
+            name = "${local.client_code}-${local.onify_instance}-api"
+            port {
+              number = 8181
+            }
             }
           }
         }
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
         host = "${rule.value}-api.${var.external-dns-domain}"
         http {
           path {
-            backend {
-              service {
-                name = "${local.client_code}-${local.onify_instance}-api"
-                port {
-                  number = 8181
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-api"
+            port {
+              number = 8181
                 }
               }
             }
@@ -151,5 +151,5 @@ resource "kubernetes_ingress_v1" "onify-api" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }

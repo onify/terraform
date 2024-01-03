@@ -1,3 +1,27 @@
+resource "kubernetes_secret" "docker-onify" {
+  metadata {
+    name      = "onify-regcred"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+  }
+
+  data = {
+    ".dockerconfigjson" = <<DOCKER
+{
+  "auths": {
+    "eu.gcr.io": {
+      "auth": "${base64encode("_json_key:${file("${var.gcr_registry_keyfile}")}")}"
+    },
+    "ghcr.io": {
+      "auth": "${base64encode("${var.ghcr_registry_username}:${var.ghcr_registry_password}")}"
+    }
+  }
+}
+DOCKER
+  }
+  type = "kubernetes.io/dockerconfigjson"
+  depends_on = [kubernetes_namespace.customer_namespace]
+}
+
 resource "kubernetes_stateful_set" "onify-agent" {
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-agent"
@@ -28,7 +52,7 @@ resource "kubernetes_stateful_set" "onify-agent" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify-agent_image
+          image = "eu.gcr.io/onify-images/hub/agent-server:${var.onify-agent_version}"
           name  = "onfiy-agent"
           port {
             name           = "onify-agent"
@@ -45,7 +69,7 @@ resource "kubernetes_stateful_set" "onify-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
 
 resource "kubernetes_service" "onify-agent" {
@@ -70,13 +94,13 @@ resource "kubernetes_service" "onify-agent" {
     //type = "NodePort"
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
 
 
 
 resource "kubernetes_ingress_v1" "onify-agent" {
-  count                  = var.onify-agent_external && !var.vanilla ? 1 : 0
+  count                  = var.onify-agent_external ? 1 : 0
   wait_for_load_balancer = false
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-agent"
@@ -104,10 +128,10 @@ resource "kubernetes_ingress_v1" "onify-agent" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-agent"
-              port {
-                number = 8080
-              }
+            name = "${local.client_code}-${local.onify_instance}-agent"
+            port {
+              number = 8080
+            }
             }
           }
           #path = "/agent"
@@ -116,16 +140,16 @@ resource "kubernetes_ingress_v1" "onify-agent" {
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
+      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
         host = "${rule.value}-agent.${var.external-dns-domain}"
         http {
           path {
-            backend {
-              service {
-                name = "${local.client_code}-${local.onify_instance}-agent"
-                port {
-                  number = 8080
+          backend {
+            service {
+              name = "${local.client_code}-${local.onify_instance}-agent"
+            port {
+              number = 8080
                 }
               }
             }
@@ -134,5 +158,5 @@ resource "kubernetes_ingress_v1" "onify-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace]
 }
