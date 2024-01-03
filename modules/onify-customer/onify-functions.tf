@@ -59,7 +59,7 @@ resource "kubernetes_service" "onify-functions" {
       task = "${local.client_code}-${local.onify_instance}-functions"
     }
     port {
-      name     = "${local.client_code}-${local.onify_instance}-functions"
+      name     = "onify-functions"
       port     = 8282
       protocol = "TCP"
     }

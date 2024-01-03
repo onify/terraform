@@ -40,7 +40,7 @@ resource "kubernetes_stateful_set" "onify-app" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/app:${var.onify-app_version}"
+          image = var.onify-app_image
           name  = "onfiy-api"
           port {
             name           = "onify-app"
@@ -109,7 +109,7 @@ resource "kubernetes_ingress_v1" "onify-app" {
     dynamic "tls" {
       for_each = var.custom_hostname!= null ? [1] : []
       content {
-        hosts = ["${var.custom_hostname}.${var.external-dns-domain}"]
+        hosts = ["${tls.value}.${var.external-dns-domain}"]
         secret_name = "tls-secret-app-${var.tls}-custom"
       }
     }
@@ -134,7 +134,7 @@ resource "kubernetes_ingress_v1" "onify-app" {
     dynamic "rule" {
       for_each = var.custom_hostname!= null ? [1] : []
       content {
-        host = "${var.custom_hostname}.${var.external-dns-domain}"
+        host = "${rule.value}.${var.external-dns-domain}"
         http {
           path {
           backend {
