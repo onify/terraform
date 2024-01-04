@@ -92,7 +92,7 @@ resource "kubernetes_ingress_v1" "onify-hub-agent" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
         hosts       = ["${tls.value}-api.${var.external_dns_domain}"]
-        secret_name = "tls-secret-hub-agent-${var.tls}-custom-${tls.value}"
+        secret_name = var.onify_hub_agent_tls != null ? var.onify_hub_agent_tls : "tls-secret-hub-agent-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
