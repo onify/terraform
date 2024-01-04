@@ -45,7 +45,7 @@ resource "kubernetes_stateful_set" "onify-hub-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 resource "kubernetes_service" "onify-hub-agent" {
@@ -68,7 +68,7 @@ resource "kubernetes_service" "onify-hub-agent" {
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 
@@ -85,13 +85,13 @@ resource "kubernetes_ingress_v1" "onify-hub-agent" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"]
+      hosts       = ["${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"]
       secret_name = var.onify_hub_agent_tls != null ? var.onify_hub_agent_tls : "tls-secret-hub-agent-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${tls.value}-api.${var.external_dns_domain}"]
+        hosts       = ["${tls.value}-api.${var.external_dns_domain}"]
         secret_name = "tls-secret-hub-agent-${var.tls}-custom-${tls.value}"
       }
     }
@@ -130,5 +130,5 @@ resource "kubernetes_ingress_v1" "onify-hub-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }

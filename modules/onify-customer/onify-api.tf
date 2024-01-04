@@ -8,7 +8,7 @@ resource "kubernetes_config_map" "onify-hub-api" {
     ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://${local.client_code}-${local.onify_instance}-elasticsearch:9200"
     ONIFY_websockets_agent_url  = "ws://${local.client_code}-${local.onify_instance}-agent:8080/hub"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 resource "kubernetes_stateful_set" "onify-hub-api" {
@@ -64,7 +64,7 @@ resource "kubernetes_stateful_set" "onify-hub-api" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 resource "kubernetes_service" "onify-hub-api" {
@@ -87,7 +87,7 @@ resource "kubernetes_service" "onify-hub-api" {
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 
@@ -105,13 +105,13 @@ resource "kubernetes_ingress_v1" "onify-hub-api" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-hub-api.${var.external_dns_domain}"]
+      hosts       = ["${local.client_code}-${local.onify_instance}-hub-api.${var.external_dns_domain}"]
       secret_name = var.onify_hub_api_tls != null ? var.onify_hub_api_tls : "tls-secret-hub-api-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${tls.value}-hub-api.${var.external_dns_domain}"]
+        hosts       = ["${tls.value}-hub-api.${var.external_dns_domain}"]
         secret_name = "tls-secret-hub-api-${var.tls}-custom-${tls.value}"
       }
     }
@@ -150,5 +150,5 @@ resource "kubernetes_ingress_v1" "onify-hub-api" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }

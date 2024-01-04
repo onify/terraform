@@ -52,5 +52,5 @@ resource "kubernetes_stateful_set" "onify-hub-worker" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }

@@ -45,7 +45,7 @@ resource "kubernetes_stateful_set" "onify-hub-functions" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 resource "kubernetes_service" "onify-hub-functions" {
@@ -65,7 +65,7 @@ resource "kubernetes_service" "onify-hub-functions" {
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 resource "kubernetes_ingress_v1" "onify-hub-functions" {
   count                  = var.onify_hub_functions_external && var.ingress ? 1 : 0
@@ -85,7 +85,7 @@ resource "kubernetes_ingress_v1" "onify-hub-functions" {
     dynamic "tls" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${tls.value}-hub-functions.${var.external_dns_domain}"]
+        hosts       = ["${tls.value}-hub-functions.${var.external_dns_domain}"]
         secret_name = length(regexall("custom", var.tls)) > 0 ? var.tls : "tls-secret-hub-functions-${var.tls}"
       }
     }
@@ -124,5 +124,5 @@ resource "kubernetes_ingress_v1" "onify-hub-functions" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace,kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
