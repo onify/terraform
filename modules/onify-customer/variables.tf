@@ -9,7 +9,7 @@ variable "helix" {
   default = true
 }
 variable "ingress" {
-  default = false
+  default = true 
 }
 variable "ghcr_registry_password" {
   default = "1234"
