@@ -29,6 +29,10 @@ variable "onify_hub_api_tls" {
   type    = string
   default = null
 }
+variable "onify_hub_functions_tls" {
+  type    = string
+  default = null
+}
 variable "onify_hub_app_tls" {
   type    = string
   default = null
