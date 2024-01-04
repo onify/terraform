@@ -155,7 +155,7 @@ variable "gke" {
   default = true
 }
 
-variable "onify_agent_envs" {
+variable "onify_hub_agent_envs" {
   type = map(string)
   default = {
     "log_level"   = "2"

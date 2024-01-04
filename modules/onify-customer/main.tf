@@ -49,7 +49,7 @@ module "helix" {
   onify_hub_app_cpu_requests       = var.onify_hub_app_cpu_requests
   external_dns_domain              = var.external_dns_domain
   gke                              = var.gke
-  onify_agent_envs                 = var.onify_agent_envs
+  onify_hub_agent_envs             = var.onify_hub_agent_envs
   onify_hub_api_envs               = var.onify_hub_api_envs
   onify_hub_app_envs               = var.onify_hub_app_envs
   onify_app_helix_envs             = var.onify_app_helix_envs
@@ -108,7 +108,7 @@ module "hub" {
   onify_hub_app_cpu_requests       = var.onify_hub_app_cpu_requests
   external_dns_domain              = var.external_dns_domain
   gke                              = var.gke
-  onify_agent_envs                 = var.onify_agent_envs
+  onify_hub_agent_envs             = var.onify_hub_agent_envs
   onify_hub_api_envs               = var.onify_hub_api_envs
   onify_hub_app_envs               = var.onify_hub_app_envs
   onify_app_helix_envs             = var.onify_app_helix_envs
