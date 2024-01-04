@@ -52,7 +52,7 @@ resource "kubernetes_stateful_set" "elasticsearch" {
   count = var.elasticsearch_address != null ? 0 : 1
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-elasticsearch"
-    namespace = "${local.client_code}-${local.onify_instance}"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
       app = "${local.client_code}-${local.onify_instance}-elasticsearch"
     }
@@ -71,6 +71,7 @@ resource "kubernetes_stateful_set" "elasticsearch" {
       metadata {
         labels = {
           app = "${local.client_code}-${local.onify_instance}-elasticsearch"
+          namespace = kubernetes_namespace.customer_namespace.metadata.0.name 
         }
       }
       spec {
