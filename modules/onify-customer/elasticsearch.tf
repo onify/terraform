@@ -71,7 +71,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
       metadata {
         labels = {
           app = "${local.client_code}-${local.onify_instance}-elasticsearch"
-          namespace = kubernetes_namespace.customer_namespace.metadata.0.name 
         }
       }
       spec {
