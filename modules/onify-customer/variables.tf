@@ -197,7 +197,7 @@ variable "onify_app_helix_envs" {
   default = {
   }
 }
-variable "onify_functions_envs" {
+variable "onify_hub_functions_envs" {
   type = map(string)
   default = {
     NODE_ENV = "production"

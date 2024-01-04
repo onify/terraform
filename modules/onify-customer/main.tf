@@ -53,7 +53,7 @@ module "helix" {
   onify_hub_api_envs                = var.onify_hub_api_envs
   onify_hub_app_envs                = var.onify_hub_app_envs
   onify_app_helix_envs          = var.onify_app_helix_envs
-  onify_functions_envs          = var.onify_functions_envs
+  onify_hub_functions_envs          = var.onify_hub_functions_envs
 
 }
 
@@ -112,5 +112,5 @@ module "hub" {
   onify_hub_api_envs                = var.onify_hub_api_envs
   onify_hub_app_envs                = var.onify_hub_app_envs
   onify_app_helix_envs          = var.onify_app_helix_envs
-  onify_functions_envs          = var.onify_functions_envs
+  onify_hub_functions_envs          = var.onify_hub_functions_envs
 }
