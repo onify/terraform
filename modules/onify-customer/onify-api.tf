@@ -6,7 +6,7 @@ resource "kubernetes_config_map" "onify-hub-api" {
 
   data = {
     ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://${local.client_code}-${local.onify_instance}-elasticsearch:9200"
-    ONIFY_websockets_agent_url  = "ws://${local.client_code}-${local.onify_instance}-agent:8080/hub"
+    ONIFY_websockets_agent_url  = "ws://${local.client_code}-${local.onify_instance}-hub-agent:8080/hub"
   }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
