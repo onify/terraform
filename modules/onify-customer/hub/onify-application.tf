@@ -1,37 +1,26 @@
-resource "kubernetes_config_map" "onify-app-hub" {
+resource "kubernetes_stateful_set" "onify-hub-app" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app-hub"
-    namespace = "${local.client_code}-${local.onify_instance}"
-  }
-
-  data = {
-    ONIFY_api_internalUrl = "http://${local.client_code}-${local.onify_instance}-api:8181/api/v2"
-  }
-}
-
-resource "kubernetes_stateful_set" "onify-app" {
-  metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app"
+    name      = "${local.client_code}-${local.onify_instance}-hub-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     labels = {
-      app  = "${local.client_code}-${local.onify_instance}-app"
-      name = "${local.client_code}-${local.onify_instance}-app"
+      app  = "${local.client_code}-${local.onify_instance}-hub-app"
+      name = "${local.client_code}-${local.onify_instance}-hub-app"
     }
   }
   spec {
-    service_name = "${local.client_code}-${local.onify_instance}-app"
+    service_name = "${local.client_code}-${local.onify_instance}-hub-app"
     replicas     = var.deployment_replicas
     selector {
       match_labels = {
-        app  = "${local.client_code}-${local.onify_instance}-app"
-        task = "${local.client_code}-${local.onify_instance}-app"
+        app  = "${local.client_code}-${local.onify_instance}-hub-app"
+        task = "${local.client_code}-${local.onify_instance}-hub-app"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "${local.client_code}-${local.onify_instance}-app"
-          task = "${local.client_code}-${local.onify_instance}-app"
+          app  = "${local.client_code}-${local.onify_instance}-hub-app"
+          task = "${local.client_code}-${local.onify_instance}-hub-app"
         }
       }
       spec {
@@ -39,14 +28,14 @@ resource "kubernetes_stateful_set" "onify-app" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify-app_image
+          image = var.onify_hub_app_image
           name  = "onfiy-api"
           port {
-            name           = "onify-app"
+            name           = "hub-app"
             container_port = 3000
           }
           dynamic "env" {
-            for_each = var.onify_app_envs
+            for_each = var.onify_hub_app_envs
             content {
               name  = env.key
               value = env.value
@@ -54,20 +43,22 @@ resource "kubernetes_stateful_set" "onify-app" {
           }
           env_from {
             config_map_ref {
-              name = "${local.client_code}-${local.onify_instance}-app-hub"
+              name = "${local.client_code}-${local.onify_instance}-hub-app-hub"
             }
           }
-
+          env {
+            name =  "ONIFY_api_internalUrl" 
+            value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
+          }
         }
       }
     }
   }
-  depends_on = [kubernetes_config_map.onify-app-hub]
 }
 
-resource "kubernetes_service" "onify-app" {
+resource "kubernetes_service" "onify-hub-app" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app"
+    name      = "${local.client_code}-${local.onify_instance}-hub-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
@@ -75,24 +66,24 @@ resource "kubernetes_service" "onify-app" {
   }
   spec {
     selector = {
-      app  = "${local.client_code}-${local.onify_instance}-app"
-      task = "${local.client_code}-${local.onify_instance}-app"
+      app  = "${local.client_code}-${local.onify_instance}-hub-app"
+      task = "${local.client_code}-${local.onify_instance}-hub-app"
     }
     port {
-      name     = "onify-app"
+      name     = "hub-app"
       port     = 3000
       protocol = "TCP"
     }
     type = "NodePort"
   }
-  depends_on = [kubernetes_stateful_set.onify-app]
+  depends_on = [kubernetes_stateful_set.onify-hub-app]
 }
 
-resource "kubernetes_ingress_v1" "onify-app" {
-  count                  = var.vanilla ? 0 : 1
+resource "kubernetes_ingress_v1" "onify-hub-app" {
+  count                  = var.ingress ? 1 : 0
   wait_for_load_balancer = false
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app"
+    name      = "${local.client_code}-${local.onify_instance}-hub-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-${var.tls}"
@@ -103,8 +94,8 @@ resource "kubernetes_ingress_v1" "onify-app" {
   }
   spec {
     tls {
-      hosts       = ["${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"]
-      secret_name = var.onify-app_tls != null ? var.onify-app_tls : "tls-secret-app-${var.tls}"
+      hosts       = ["${local.client_code}-${local.onify_instance}-hub-app.${var.external-dns-domain}"]
+      secret_name = var.onify_hub_app_tls != null ? var.onify_hub_app_tls : "tls-secret-app-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
@@ -115,12 +106,12 @@ resource "kubernetes_ingress_v1" "onify-app" {
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-app.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-hub-app.${var.external-dns-domain}"
       http {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-app"
+              name = "${local.client_code}-${local.onify_instance}-hub-app"
               port {
                 number = 3000
               }
@@ -139,7 +130,7 @@ resource "kubernetes_ingress_v1" "onify-app" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-app"
+                name = "${local.client_code}-${local.onify_instance}-hub-app"
                 port {
                   number = 3000
                 }
@@ -150,5 +141,5 @@ resource "kubernetes_ingress_v1" "onify-app" {
       }
     }
   }
-  depends_on = [kubernetes_service.onify-app]
+  depends_on = [kubernetes_service.onify-hub-app]
 }

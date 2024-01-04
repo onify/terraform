@@ -1,6 +1,6 @@
 locals {
-  client_code    = var.onify_api_envs.ONIFY_client_code
-  onify_instance = var.onify_api_envs.ONIFY_client_instance
+  client_code    = var.onify_hub_api_envs.ONIFY_client_code
+  onify_instance = var.onify_hub_api_envs.ONIFY_client_instance
 }
 variable "kubernetes_node_api_worker" {
   default = null
@@ -8,8 +8,8 @@ variable "kubernetes_node_api_worker" {
 variable "helix" {
   default = true
 }
-variable "vanilla" {
-  default = false
+variable "ingress" {
+  default = true 
 }
 variable "ghcr_registry_password" {
   default = "1234"
@@ -17,19 +17,19 @@ variable "ghcr_registry_password" {
 variable "ghcr_registry_username" {
   default = "onify"
 }
-variable "onify-worker_tls" {
+variable "onify_hub_worker_tls" {
   type    = string
   default = null
 }
-variable "onify-agent_tls" {
+variable "onify_hub_agent_tls" {
   type    = string
   default = null
 }
-variable "onify-api_tls" {
+variable "onify_hub_api_tls" {
   type    = string
   default = null
 }
-variable "onify-app_tls" {
+variable "onify_hub_app_tls" {
   type    = string
   default = null
 }
@@ -49,31 +49,31 @@ variable "deployment_replicas" {
 variable "gcr_registry_keyfile" {
   default = null
 }
-variable "onify-functions_image" {
+variable "onify_hub_functions_image" {
   default = "eu.gcr.io/onify-images/hub/functions:latest"
 }
-variable "onify-helix_image" {
+variable "onify_helix_image" {
   default = "ghcr.io/onify/helix-app-lab:latest"
 }
-variable "onify-app_image" {
+variable "onify_hub_app_image" {
   default = "eu.gcr.io/onify-images/hub/app:latest"
 }
-variable "onify-agent_image" {
+variable "onify_hub_agent_image" {
   default = "eu.gcr.io/onify-images/hub/agent-server:latest"
 }
-variable "onify-api_image" {
+variable "onify_hub_api_image" {
   default = "eu.gcr.io/onify-images/hub/api:latest"
 }
-variable "onify-worker_image" {
+variable "onify_hub_worker_image" {
   default = "eu.gcr.io/onify-images/hub/api:latest"
 }
-variable "onify-api_external" {
+variable "onify_hub_api_external" {
   default = true
 }
-variable "onify-functions_external" {
+variable "onify_hub_functions_external" {
   default = true
 }
-variable "onify-agent_external" {
+variable "onify_hub_agent_external" {
   default = true
 }
 variable "elasticsearch_address" {
@@ -96,52 +96,52 @@ variable "elasticsearch_memory_requests" {
 variable "elasticsearch_version" {
   default = "7.16.1"
 }
-variable "onify-api_memory_limit" {
+variable "onify_hub_api_memory_limit" {
   default = "100Mi"
 }
-variable "onify-api_cpu_limit" {
+variable "onify_hub_api_cpu_limit" {
   default = "100m"
 }
-variable "onify-api_memory_requests" {
+variable "onify_hub_api_memory_requests" {
   default = "100Mi"
 }
-variable "onify-api_cpu_requests" {
+variable "onify_hub_api_cpu_requests" {
   default = "100m"
 }
-variable "onify-agent_memory_limit" {
+variable "onify_hub_agent_memory_limit" {
   default = "100Mi"
 }
-variable "onify-agent_cpu_limit" {
+variable "onify_hub_agent_cpu_limit" {
   default = "100m"
 }
-variable "onify-agent_memory_requests" {
+variable "onify_hub_agent_memory_requests" {
   default = "100Mi"
 }
-variable "onify-agent_cpu_requests" {
+variable "onify_hub_agent_cpu_requests" {
   default = "100m"
 }
-variable "onify-worker_memory_limit" {
+variable "onify_hub_worker_memory_limit" {
   default = "100Mi"
 }
-variable "onify-worker_cpu_limit" {
+variable "onify_hub_worker_cpu_limit" {
   default = "100m"
 }
-variable "onify-worker_memory_requests" {
+variable "onify_hub_worker_memory_requests" {
   default = "100Mi"
 }
-variable "onify-worker_cpu_requests" {
+variable "onify_hub_worker_cpu_requests" {
   default = "100m"
 }
-variable "onify-app_memory_limit" {
+variable "onify_hub_app_memory_limit" {
   default = "100Mi"
 }
-variable "onify-app_cpu_limit" {
+variable "onify_hub_app_cpu_limit" {
   default = "100m"
 }
-variable "onify-app_memory_requests" {
+variable "onify_hub_app_memory_requests" {
   default = "100Mi"
 }
-variable "onify-app_cpu_requests" {
+variable "onify_hub_app_cpu_requests" {
   default = "100m"
 }
 variable "ssl_staging" {
@@ -163,7 +163,7 @@ variable "onify_agent_envs" {
   }
 }
 
-variable "onify_api_envs" {
+variable "onify_hub_api_envs" {
   type = map(string)
   default = {
     NODE_ENV                   = "production"
@@ -184,7 +184,7 @@ variable "onify_api_envs" {
   }
 }
 
-variable "onify_app_envs" {
+variable "onify_hub_app_envs" {
   type = map(string)
   default = {
     NODE_ENV                    = "production"

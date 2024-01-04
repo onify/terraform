@@ -1,6 +1,6 @@
-resource "kubernetes_config_map" "onify-app-helix" {
+resource "kubernetes_config_map" "onify-helix-app" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app-helix"
+    name      = "${local.client_code}-${local.onify_instance}-helix-app"
     namespace = "${local.client_code}-${local.onify_instance}"
   }
 
@@ -9,29 +9,29 @@ resource "kubernetes_config_map" "onify-app-helix" {
   }
 }
 
-resource "kubernetes_stateful_set" "onify-app-helix" {
+resource "kubernetes_stateful_set" "onify-helix-app" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app-helix"
+    name      = "${local.client_code}-${local.onify_instance}-helix-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     labels = {
-      app  = "${local.client_code}-${local.onify_instance}-app-helix"
-      name = "${local.client_code}-${local.onify_instance}-app-helix"
+      app  = "${local.client_code}-${local.onify_instance}-helix-app"
+      name = "${local.client_code}-${local.onify_instance}-helix-app"
     }
   }
   spec {
-    service_name = "${local.client_code}-${local.onify_instance}-app-helix"
+    service_name = "${local.client_code}-${local.onify_instance}-helix-app"
     replicas     = var.deployment_replicas
     selector {
       match_labels = {
-        app  = "${local.client_code}-${local.onify_instance}-app-helix"
-        task = "${local.client_code}-${local.onify_instance}-app-helix"
+        app  = "${local.client_code}-${local.onify_instance}-helix-app"
+        task = "${local.client_code}-${local.onify_instance}-helix-app"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "${local.client_code}-${local.onify_instance}-app-helix"
-          task = "${local.client_code}-${local.onify_instance}-app-helix"
+          app  = "${local.client_code}-${local.onify_instance}-helix-app"
+          task = "${local.client_code}-${local.onify_instance}-helix-app"
         }
       }
       spec {
@@ -39,10 +39,10 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify-helix_image
-          name  = "onfiy-app-helix"
+          image = var.onify_helix_image
+          name  = "onfiy-helix-app"
           port {
-            name           = "onify-app-helix"
+            name           = "helix-app"
             container_port = 4000
           }
           dynamic "env" {
@@ -52,21 +52,19 @@ resource "kubernetes_stateful_set" "onify-app-helix" {
               value = env.value
             }
           }
-          env_from {
-            config_map_ref {
-              name = "${local.client_code}-${local.onify_instance}-app-helix"
-            }
+          env {
+            name =  "ONIFY_api_internalUrl" 
+            value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
           }
         }
       }
     }
   }
-  depends_on = [kubernetes_config_map.onify-app-helix]
 }
 
-resource "kubernetes_service" "onify-app-helix" {
+resource "kubernetes_service" "onify-helix-app" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app-helix"
+    name      = "${local.client_code}-${local.onify_instance}-helix-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
@@ -74,23 +72,23 @@ resource "kubernetes_service" "onify-app-helix" {
   }
   spec {
     selector = {
-      app  = "${local.client_code}-${local.onify_instance}-app-helix"
-      task = "${local.client_code}-${local.onify_instance}-app-helix"
+      app  = "${local.client_code}-${local.onify_instance}-helix-app"
+      task = "${local.client_code}-${local.onify_instance}-helix-app"
     }
     port {
-      name     = "onify-app-helix"
+      name     = "helix-app"
       port     = 4000
       protocol = "TCP"
     }
   }
-  depends_on = [kubernetes_stateful_set.onify-app-helix]
+  depends_on = [kubernetes_stateful_set.onify-helix-app]
 }
 
-resource "kubernetes_ingress_v1" "onify-app-helix" {
-  count                  = var.vanilla ? 0 : 1
+resource "kubernetes_ingress_v1" "onify-helix-app" {
+  count                  = var.ingress ? 1 : 0
   wait_for_load_balancer = false
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app-helix"
+    name      = "${local.client_code}-${local.onify_instance}-helix-app"
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-${var.tls}"
@@ -101,7 +99,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
   spec {
     tls {
       hosts       = ["${local.client_code}-${local.onify_instance}.${var.external-dns-domain}"]
-      secret_name = "tls-secret-app-${var.tls}"
+      secret_name = var.onify_hub_app_tls != null ? var.onify_hub_app_tls :  "tls-secret-app-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
@@ -117,7 +115,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-app"
+              name = "${local.client_code}-${local.onify_instance}-hub-app"
               port {
                 number = 3000
               }
@@ -129,7 +127,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-app-helix"
+              name = "${local.client_code}-${local.onify_instance}-helix-app"
               port {
                 number = 4000
               }
@@ -148,7 +146,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-app"
+                name = "${local.client_code}-${local.onify_instance}-hub-app"
                 port {
                   number = 3000
                 }
@@ -160,7 +158,7 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-app-helix"
+                name = "${local.client_code}-${local.onify_instance}-helix-app"
                 port {
                   number = 4000
                 }
@@ -173,6 +171,6 @@ resource "kubernetes_ingress_v1" "onify-app-helix" {
       }
     }
   }
-  depends_on = [kubernetes_service.onify-app-helix]
+  depends_on = [kubernetes_service.onify-helix-app]
 }
 
