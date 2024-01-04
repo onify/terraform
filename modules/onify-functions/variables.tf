@@ -30,6 +30,6 @@ variable "public" {
   default = false
 }
 
-variable "external-dns-domain" {
+variable "external_dns_domain" {
   type = string
 }

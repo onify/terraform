@@ -70,7 +70,7 @@ resource "kubernetes_deployment" "external-dns" {
         container {
           image = "k8s.gcr.io/external-dns/external-dns:v0.8.0"
           name  = "external-dns"
-          args = ["--source=service","--domain-filter=${var.external-dns-domain}","--provider=google","--google-project=${var.gce_project_id}","--registry=txt","--txt-owner-id=onify_terraform"]
+          args = ["--source=service","--domain-filter=${var.external_dns_domain}","--provider=google","--google-project=${var.gce_project_id}","--registry=txt","--txt-owner-id=onify_terraform"]
       }
     }
   }

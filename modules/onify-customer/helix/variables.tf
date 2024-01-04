@@ -144,10 +144,7 @@ variable "onify_hub_app_memory_requests" {
 variable "onify_hub_app_cpu_requests" {
   default = "100m"
 }
-variable "ssl_staging" {
-  default = true
-}
-variable "external-dns-domain" {
+variable "external_dns_domain" {
   default = "onify.io"
 }
 variable "gke" {

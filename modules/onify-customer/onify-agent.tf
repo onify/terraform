@@ -85,19 +85,19 @@ resource "kubernetes_ingress_v1" "onify-hub-agent" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-hub-agent.${var.external-dns-domain}"]
+      hosts = ["${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"]
       secret_name = var.onify_hub_agent_tls != null ? var.onify_hub_agent_tls : "tls-secret-hub-agent-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname!= null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${tls.value}-api.${var.external-dns-domain}"]
+        hosts = ["${tls.value}-api.${var.external_dns_domain}"]
         secret_name = "tls-secret-hub-agent-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-hub-agent.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"
       http {
         path {
           backend {
@@ -114,7 +114,7 @@ resource "kubernetes_ingress_v1" "onify-hub-agent" {
     dynamic "rule" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        host = "${rule.value}-hub-agent.${var.external-dns-domain}"
+        host = "${rule.value}-hub-agent.${var.external_dns_domain}"
         http {
           path {
             backend {
