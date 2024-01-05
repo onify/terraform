@@ -134,7 +134,7 @@ resource "kubernetes_ingress_v1" "onify-hub-api" {
     dynamic "rule" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        host = "${rule.value}-hub-api.${var.external_dns_domain}"
+        host = "${rule.value}.${var.external_dns_domain}"
         http {
           path {
             backend {
