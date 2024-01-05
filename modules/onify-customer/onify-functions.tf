@@ -67,6 +67,27 @@ resource "kubernetes_service" "onify-hub-functions" {
   }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
+
+resource "kubernetes_service" "onify-hub-functions-alias" {
+  metadata {
+    name      = "hub-functions"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+  }
+  spec {
+    selector = {
+      app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+      task = "${local.client_code}-${local.onify_instance}-hub-functions"
+    }
+    port {
+      name     = "hub-functions"
+      port     = 8282
+      protocol = "TCP"
+    }
+    type = "ClusterIP"
+  }
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
+}
+
 resource "kubernetes_ingress_v1" "onify-hub-functions" {
   count                  = var.onify_hub_functions_external && var.ingress ? 1 : 0
   wait_for_load_balancer = false
@@ -80,13 +101,13 @@ resource "kubernetes_ingress_v1" "onify-hub-functions" {
   spec {
     tls {
       hosts       = ["${local.client_code}-${local.onify_instance}-hub-functions.${var.external_dns_domain}"]
-      secret_name = "tls-secret-hub-functions-${var.tls}"
+      secret_name = var.onify_hub_functions_tls != null ? var.onify_hub_functions_tls : "tls-secret-hub-functions-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
         hosts       = ["${tls.value}-hub-functions.${var.external_dns_domain}"]
-        secret_name = length(regexall("custom", var.tls)) > 0 ? var.tls : "tls-secret-hub-functions-${var.tls}"
+        secret_name = var.onify_hub_functions_tls != null ? var.onify_hub_functions_tls : "tls-secret-hub-functions-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
