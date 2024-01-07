@@ -133,7 +133,7 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
               }
             }
           }
-          path      = "/helix"
+          path      = var.helix_path 
           path_type = "Prefix"
         }
       }
@@ -164,7 +164,7 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
                 }
               }
             }
-            path      = "/helix"
+            path      = var.helix_path
             path_type = "Prefix"
           }
         }
