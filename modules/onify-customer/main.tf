@@ -5,6 +5,7 @@ module "helix" {
 
   kubernetes_node_api_worker       = var.kubernetes_node_api_worker
   helix                            = var.helix
+  helix_path                       = var.helix_path
   ingress                          = var.ingress
   ghcr_registry_password           = var.ghcr_registry_password
   ghcr_registry_username           = var.ghcr_registry_username
@@ -64,6 +65,7 @@ module "hub" {
 
   kubernetes_node_api_worker       = var.kubernetes_node_api_worker
   helix                            = var.helix
+  helix_path                       = var.helix_path
   ingress                          = var.ingress
   ghcr_registry_password           = var.ghcr_registry_password
   ghcr_registry_username           = var.ghcr_registry_username
