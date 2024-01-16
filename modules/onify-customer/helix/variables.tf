@@ -5,6 +5,10 @@ locals {
 variable "kubernetes_node_api_worker" {
   default = null
 }
+variable "hub_app_path" {
+  default = "/"
+  type = string
+}
 variable "helix_path" {
   default = "/helix"
   type = string

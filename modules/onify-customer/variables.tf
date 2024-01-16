@@ -5,15 +5,19 @@ locals {
 variable "kubernetes_node_api_worker" {
   default = null
 }
+variable "hub_app_path" {
+  default = "/"
+  type    = string
+}
 variable "helix_path" {
   default = "/helix"
-  type = string
+  type    = string
 }
 variable "helix" {
   default = true
 }
 variable "ingress" {
-  default = true 
+  default = true
 }
 variable "ghcr_registry_password" {
   default = "1234"

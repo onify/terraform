@@ -117,7 +117,7 @@ resource "kubernetes_ingress_v1" "onify-hub-app" {
               }
             }
           }
-          path      = "/"
+          path      = var.hub_app_path
           path_type = "Prefix"
         }
       }
@@ -136,6 +136,8 @@ resource "kubernetes_ingress_v1" "onify-hub-app" {
                 }
               }
             }
+          path      = var.hub_app_path 
+          path_type = "Prefix"
           }
         }
       }
