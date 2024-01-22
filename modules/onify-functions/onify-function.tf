@@ -96,12 +96,12 @@ resource "kubernetes_ingress_v1" "function" {
   }
   spec {
     tls {
-      hosts = ["${var.client_code}-${var.client_instance}-${var.name}.${var.external-dns-domain}"]
+      hosts = ["${var.client_code}-${var.client_instance}-${var.name}.${var.external_dns_domain}"]
       secret_name = "tls-secret-${var.name}-${var.tls}"
     }
     ingress_class_name = "nginx"
     rule {
-    host = "${var.client_code}-${var.client_instance}-${var.name}.${var.external-dns-domain}"
+    host = "${var.client_code}-${var.client_instance}-${var.name}.${var.external_dns_domain}"
       http {
         path {
           backend {

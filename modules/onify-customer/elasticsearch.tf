@@ -1,16 +1,3 @@
-# ### EXAMPLE SSD STORAGE CLASS
-# resource "kubernetes_storage_class" "ssd" {
-#   count = var.elasticsearch_address != null ? 0 : 1
-#   metadata {
-#     name = "ssd"
-#   }
-#   storage_provisioner = "kubernetes.io/gce-pd"
-#   parameters = {
-#     type = "pd-ssd"
-#   }
-#   mount_options = ["file_mode=0700", "dir_mode=0777", "mfsymlinks", "uid=1000", "gid=1000", "nobrl", "cache=none"]
-# }
-
 resource "kubernetes_persistent_volume" "local" {
   count = var.elasticsearch_address != null ? 0 : 1
   metadata {
@@ -21,10 +8,10 @@ resource "kubernetes_persistent_volume" "local" {
     capacity = {
       storage = var.elasticsearch_disksize
     }
-    persistent_volume_reclaim_policy = "Retain" // performs a basic scrub (rm -rf /thevolume/*) on the volume and makes it available again for a new claim"
-    access_modes = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    access_modes                     = ["ReadWriteOnce"]
     persistent_volume_source {
-     host_path {
+      host_path {
         path = "/usr/share/elasticsearch/data"
       }
     }
@@ -56,7 +43,6 @@ resource "kubernetes_service" "elasticsearch" {
       protocol = "TCP"
     }
     type = "NodePort"
-    //type = "LoadBalancer"
   }
   depends_on = [kubernetes_namespace.customer_namespace]
 }
@@ -66,7 +52,7 @@ resource "kubernetes_stateful_set" "elasticsearch" {
   count = var.elasticsearch_address != null ? 0 : 1
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-elasticsearch"
-    namespace = "${local.client_code}-${local.onify_instance}"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
       app = "${local.client_code}-${local.onify_instance}-elasticsearch"
     }
@@ -124,16 +110,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
             name       = "${local.client_code}-${local.onify_instance}-data"
             mount_path = "/usr/share/elasticsearch/data"
           }
-          
-          # liveness_probe {
-          #   http_get {
-          #     path   = "/_cluster/health"
-          #     port   = 9200
-          #     scheme = "HTTP"
-          #   }
-          #   initial_delay_seconds = 30
-          #   timeout_seconds       = 30
-          # }
         }
         termination_grace_period_seconds = 300
       }
@@ -147,10 +123,10 @@ resource "kubernetes_stateful_set" "elasticsearch" {
     }
     volume_claim_template {
       metadata {
-        name      = "${local.client_code}-${local.onify_instance}-data"
+        name = "${local.client_code}-${local.onify_instance}-data"
       }
       spec {
-        access_modes = ["ReadWriteOnce"]
+        access_modes       = ["ReadWriteOnce"]
         storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
         resources {
           requests = {
@@ -160,10 +136,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
       }
     }
   }
-  # provisioner "local-exec" {
-  #       when = destroy    
-  #       command = "kubectl delete pvc ${local.client_code}-${local.onify_instance}-data -n ${kubernetes_namespace.customer_namespace.metadata.0.name}"
-  # }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_persistent_volume.local]
 }
 resource "kubernetes_ingress_v1" "onify-elasticsearch" {
@@ -178,20 +150,20 @@ resource "kubernetes_ingress_v1" "onify-elasticsearch" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-elasticsearch.${var.external-dns-domain}"]
+      hosts       = ["${local.client_code}-${local.onify_instance}-elasticsearch.${var.external_dns_domain}"]
       secret_name = "tls-secret-elasticsearch-${var.tls}"
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-elasticsearch.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-elasticsearch.${var.external_dns_domain}"
       http {
         path {
           backend {
             service {
-            name = "${local.client_code}-${local.onify_instance}-elasticsearch"
-            port {
-              number = 9200
-            }
+              name = "${local.client_code}-${local.onify_instance}-elasticsearch"
+              port {
+                number = 9200
+              }
             }
           }
         }

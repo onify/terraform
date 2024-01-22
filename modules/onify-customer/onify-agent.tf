@@ -1,50 +1,26 @@
-resource "kubernetes_secret" "docker-onify" {
+resource "kubernetes_stateful_set" "onify-hub-agent" {
   metadata {
-    name      = "onify-regcred"
-    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
-  }
-
-  data = {
-    ".dockerconfigjson" = <<DOCKER
-{
-  "auths": {
-    "eu.gcr.io": {
-      "auth": "${base64encode("_json_key:${file("${var.gcr_registry_keyfile}")}")}"
-    }
-    "ghcr.io": {
-      "auth": "${base64encode("${var.ghcr_registry_username}:${var.ghcr_registry_password}")}"
-    }
-  }
-}
-DOCKER
-  }
-  type = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.customer_namespace]
-}
-
-resource "kubernetes_stateful_set" "onify-agent" {
-  metadata {
-    name      = "${local.client_code}-${local.onify_instance}-agent"
+    name      = "${local.client_code}-${local.onify_instance}-hub-agent"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
-      app  = "${local.client_code}-${local.onify_instance}-agent"
+      app  = "${local.client_code}-${local.onify_instance}-hub-agent"
       name = "${local.client_code}-${local.onify_instance}"
     }
   }
   spec {
-    service_name = "${local.client_code}-${local.onify_instance}-agent"
+    service_name = "${local.client_code}-${local.onify_instance}-hub-agent"
     replicas     = var.deployment_replicas
     selector {
       match_labels = {
-        app  = "${local.client_code}-${local.onify_instance}-agent"
-        task = "${local.client_code}-${local.onify_instance}-agent"
+        app  = "${local.client_code}-${local.onify_instance}-hub-agent"
+        task = "${local.client_code}-${local.onify_instance}-hub-agent"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "${local.client_code}-${local.onify_instance}-agent"
-          task = "${local.client_code}-${local.onify_instance}-agent"
+          app  = "${local.client_code}-${local.onify_instance}-hub-agent"
+          task = "${local.client_code}-${local.onify_instance}-hub-agent"
         }
       }
       spec {
@@ -52,14 +28,14 @@ resource "kubernetes_stateful_set" "onify-agent" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/agent-server:${var.onify-agent_version}"
-          name  = "onfiy-agent"
+          image = var.onify_hub_agent_image
+          name  = "onfiy-hub-agent"
           port {
-            name           = "onify-agent"
+            name           = "hub-agent"
             container_port = 8080
           }
           dynamic "env" {
-            for_each = var.onify_agent_envs
+            for_each = var.onify_hub_agent_envs
             content {
               name  = env.key
               value = env.value
@@ -69,41 +45,39 @@ resource "kubernetes_stateful_set" "onify-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
-resource "kubernetes_service" "onify-agent" {
+resource "kubernetes_service" "onify-hub-agent" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-agent"
+    name      = "${local.client_code}-${local.onify_instance}-hub-agent"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
     }
   }
   spec {
-    //external_traffic_policy = "Local"
     selector = {
-      app  = "${local.client_code}-${local.onify_instance}-agent"
-      task = "${local.client_code}-${local.onify_instance}-agent"
+      app  = "${local.client_code}-${local.onify_instance}-hub-agent"
+      task = "${local.client_code}-${local.onify_instance}-hub-agent"
     }
     port {
-      name     = "onify-agent"
+      name     = "hub-agent"
       port     = 8080
       protocol = "TCP"
     }
-    //type = "NodePort"
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 
 
-resource "kubernetes_ingress_v1" "onify-agent" {
-  count                  = var.onify-agent_external ? 1 : 0
+resource "kubernetes_ingress_v1" "onify-hub-agent" {
+  count                  = var.onify_hub_agent_external && var.ingress ? 1 : 0
   wait_for_load_balancer = false
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-agent"
+    name      = "${local.client_code}-${local.onify_instance}-hub-agent"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
@@ -111,45 +85,43 @@ resource "kubernetes_ingress_v1" "onify-agent" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-agent.${var.external-dns-domain}"]
-      secret_name = var.onify-agent_tls != null ? var.onify-agent_tls : "tls-secret-agent-${var.tls}"
+      hosts       = ["${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"]
+      secret_name = var.onify_hub_agent_tls != null ? var.onify_hub_agent_tls : "tls-secret-hub-agent-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${var.custom_hostname}-api.${var.external-dns-domain}"]
-        secret_name = "tls-secret-agent-${var.tls}-custom"
+        hosts       = ["${tls.value}-api.${var.external_dns_domain}"]
+        secret_name = var.onify_hub_agent_tls != null ? var.onify_hub_agent_tls : "tls-secret-hub-agent-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-agent.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-hub-agent.${var.external_dns_domain}"
       http {
         path {
           backend {
             service {
-            name = "${local.client_code}-${local.onify_instance}-agent"
-            port {
-              number = 8080
-            }
+              name = "${local.client_code}-${local.onify_instance}-hub-agent"
+              port {
+                number = 8080
+              }
             }
           }
-          #path = "/agent"
-          #path_type = "Prefix"
         }
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        host = "${var.custom_hostname}-agent.${var.external-dns-domain}"
+        host = "${rule.value}-hub-agent.${var.external_dns_domain}"
         http {
           path {
-          backend {
-            service {
-              name = "${local.client_code}-${local.onify_instance}-agent"
-            port {
-              number = 8080
+            backend {
+              service {
+                name = "${local.client_code}-${local.onify_instance}-hub-agent"
+                port {
+                  number = 8080
                 }
               }
             }
@@ -158,5 +130,5 @@ resource "kubernetes_ingress_v1" "onify-agent" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }

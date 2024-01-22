@@ -1,26 +1,26 @@
-resource "kubernetes_stateful_set" "onify-functions" {
+resource "kubernetes_stateful_set" "onify-hub-functions" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-functions"
+    name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
-      app  = "${local.client_code}-${local.onify_instance}-functions"
-      name = "${local.client_code}-${local.onify_instance}-functions"
+      app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+      name = "${local.client_code}-${local.onify_instance}-hub-functions"
     }
   }
   spec {
-    service_name = "${local.client_code}-${local.onify_instance}-functions"
+    service_name = "${local.client_code}-${local.onify_instance}-hub-functions"
     replicas     = var.deployment_replicas
     selector {
       match_labels = {
-        app  = "${local.client_code}-${local.onify_instance}-functions"
-        task = "${local.client_code}-${local.onify_instance}-functions"
+        app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+        task = "${local.client_code}-${local.onify_instance}-hub-functions"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "${local.client_code}-${local.onify_instance}-functions"
-          task = "${local.client_code}-${local.onify_instance}-functions"
+          app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+          task = "${local.client_code}-${local.onify_instance}-hub-functions"
         }
       }
       spec {
@@ -28,14 +28,14 @@ resource "kubernetes_stateful_set" "onify-functions" {
           name = "onify-regcred"
         }
         container {
-          image = "eu.gcr.io/onify-images/hub/functions:latest"
-          name  = "onfiy-api"
+          image = var.onify_hub_functions_image
+          name  = "onfiy-hub-functions"
           port {
-            name           = "onify-functions"
+            name           = "hub-functions"
             container_port = 8282
           }
           dynamic "env" {
-            for_each = var.onify_functions_envs
+            for_each = var.onify_hub_functions_envs
             content {
               name  = env.key
               value = env.value
@@ -45,33 +45,54 @@ resource "kubernetes_stateful_set" "onify-functions" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
-resource "kubernetes_service" "onify-functions" {
+resource "kubernetes_service" "onify-hub-functions" {
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-functions"
+    name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
   }
   spec {
     selector = {
-      app  = "${local.client_code}-${local.onify_instance}-functions"
-      task = "${local.client_code}-${local.onify_instance}-functions"
+      app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+      task = "${local.client_code}-${local.onify_instance}-hub-functions"
     }
     port {
-      name     = "${local.client_code}-${local.onify_instance}-functions"
+      name     = "hub-functions"
       port     = 8282
       protocol = "TCP"
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
-resource "kubernetes_ingress_v1" "onify-functions" {
-  count                  = var.onify-functions_external ? 1 : 0
+
+resource "kubernetes_service" "onify-hub-functions-alias" {
+  metadata {
+    name      = "hub-functions"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+  }
+  spec {
+    selector = {
+      app  = "${local.client_code}-${local.onify_instance}-hub-functions"
+      task = "${local.client_code}-${local.onify_instance}-hub-functions"
+    }
+    port {
+      name     = "hub-functions"
+      port     = 8282
+      protocol = "TCP"
+    }
+    type = "ClusterIP"
+  }
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
+}
+
+resource "kubernetes_ingress_v1" "onify-hub-functions" {
+  count                  = var.onify_hub_functions_external && var.ingress ? 1 : 0
   wait_for_load_balancer = false
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-functions"
+    name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cert-manager.io/cluster-issuer" = "letsencrypt-${var.tls}"
@@ -79,43 +100,43 @@ resource "kubernetes_ingress_v1" "onify-functions" {
   }
   spec {
     tls {
-      hosts = ["${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"]
-      secret_name = length(regexall("custom", var.tls)) > 0 ? var.tls : "tls-secret-app-${var.tls}"
+      hosts       = ["${local.client_code}-${local.onify_instance}-hub-functions.${var.external_dns_domain}"]
+      secret_name = var.onify_hub_functions_tls != null ? var.onify_hub_functions_tls : "tls-secret-hub-functions-${var.tls}"
     }
     dynamic "tls" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        hosts = ["${var.custom_hostname}-functions.${var.external-dns-domain}"]
-        secret_name = "tls-secret-functions-${var.tls}-custom"
+        hosts       = ["${tls.value}-hub-functions.${var.external_dns_domain}"]
+        secret_name = var.onify_hub_functions_tls != null ? var.onify_hub_functions_tls : "tls-secret-hub-functions-${var.tls}-custom-${tls.value}"
       }
     }
     ingress_class_name = "nginx"
     rule {
-      host = "${local.client_code}-${local.onify_instance}-functions.${var.external-dns-domain}"
+      host = "${local.client_code}-${local.onify_instance}-hub-functions.${var.external_dns_domain}"
       http {
         path {
           backend {
             service {
-            name = "${local.client_code}-${local.onify_instance}-functions"
-            port {
-              number = 8282
-            }
+              name = "${local.client_code}-${local.onify_instance}-hub-functions"
+              port {
+                number = 8282
+              }
             }
           }
         }
       }
     }
     dynamic "rule" {
-      for_each = var.custom_hostname!= null ? [1] : []
+      for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
       content {
-        host = "${var.custom_hostname}-functions.${var.external-dns-domain}"
+        host = "${rule.value}-hub-functions.${var.external_dns_domain}"
         http {
           path {
-          backend {
-            service {
-              name = "${local.client_code}-${local.onify_instance}-functions"
-            port {
-              number = 8282
+            backend {
+              service {
+                name = "${local.client_code}-${local.onify_instance}-hub-functions"
+                port {
+                  number = 8282
                 }
               }
             }
@@ -124,5 +145,5 @@ resource "kubernetes_ingress_v1" "onify-functions" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.customer_namespace]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
