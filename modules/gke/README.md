@@ -14,7 +14,7 @@ module "gke" {
 ```
 
 
-#fixed outside ip is optional, if you want to have a fixed ip for the cluster set it to true.
+# fixed outside ip is optional, if you want to have a fixed ip for the cluster set it to true.
 For a public cluster we might need to deploy a ip masq agent. This can be done with the following manifests:
 Info:
 _https://niravshah2705.medium.com/public-gke-with-fixed-outbound-ip-e1f9e67845fc_
