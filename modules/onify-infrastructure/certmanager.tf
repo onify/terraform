@@ -1,12 +1,12 @@
 resource "helm_release" "cert_manager" {
-  name  = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart = "cert-manager"
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
   create_namespace = true
-  version    = "v1.10.1"
-  namespace  = "cert-manager"
+  version          = "v1.10.1"
+  namespace        = "cert-manager"
   provisioner "local-exec" {
-        command = "sleep 10"
+    command = "sleep 10"
   }
   set {
     name  = "startupapicheck.timeout"
@@ -14,7 +14,7 @@ resource "helm_release" "cert_manager" {
   }
   set {
     name  = "installCRDs"
-    value = true 
+    value = true
   }
   #set {
   #  name = "ingress-class"
@@ -28,7 +28,7 @@ resource "helm_release" "cert_manager" {
 
 
 resource "kubectl_manifest" "cluster_issuer_letsencrypt_prod" {
-  depends_on = [ helm_release.cert_manager ]
+  depends_on = [helm_release.cert_manager]
   yaml_body  = <<YAML
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -54,7 +54,7 @@ YAML
 }
 
 resource "kubectl_manifest" "cluster_issuer_letsencrypt_staging" {
-  depends_on = [ helm_release.cert_manager ]
+  depends_on = [helm_release.cert_manager]
   yaml_body  = <<YAML
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

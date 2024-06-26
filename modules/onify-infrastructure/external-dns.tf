@@ -12,16 +12,16 @@ resource "kubernetes_cluster_role" "external-dns" {
   }
   rule {
     api_groups = [""]
-    resources  = ["services","endpoints","pods"]
-    verbs      = ["get","watch","list"]
+    resources  = ["services", "endpoints", "pods"]
+    verbs      = ["get", "watch", "list"]
   }
   rule {
-    api_groups = ["extensions","networking.k8s.io"] 
+    api_groups = ["extensions", "networking.k8s.io"]
     resources  = ["ingresses"]
-    verbs      = ["get","watch","list"]
+    verbs      = ["get", "watch", "list"]
   }
   rule {
-    api_groups = [""] 
+    api_groups = [""]
     resources  = ["nodes"]
     verbs      = ["list"]
   }
@@ -70,9 +70,9 @@ resource "kubernetes_deployment" "external-dns" {
         container {
           image = "k8s.gcr.io/external-dns/external-dns:v0.8.0"
           name  = "external-dns"
-          args = ["--source=service","--domain-filter=${var.external_dns_domain}","--provider=google","--google-project=${var.gce_project_id}","--registry=txt","--txt-owner-id=onify_terraform"]
+          args  = ["--source=service", "--domain-filter=${var.external_dns_domain}", "--provider=google", "--google-project=${var.gce_project_id}", "--registry=txt", "--txt-owner-id=onify_terraform"]
+        }
       }
     }
-  }
   }
 }
