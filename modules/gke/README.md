@@ -19,8 +19,7 @@ For a public cluster we might need to deploy a ip masq agent. This can be done w
 Info:
 _https://niravshah2705.medium.com/public-gke-with-fixed-outbound-ip-e1f9e67845fc_
 
-1.
-configmap:
+1. configmap:
 ```
 nonMasqueradeCIDRs:
   - 0.0.0.0/0
@@ -33,7 +32,6 @@ kubectl create configmap ip-masq-agent --from-file config --namespace kube-syste
 ```
 
 2. Daemonset for masq agent
-
 
 manifest:
 ```
