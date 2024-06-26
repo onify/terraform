@@ -37,6 +37,7 @@ resource "google_container_node_pool" "primary_nodes" {
    autoscaling {
       max_node_count = var.gke_num_nodes
       min_node_count = 1
+      location_policy = "BALANCED"
    }
   node_config {
     oauth_scopes = [
@@ -50,10 +51,15 @@ resource "google_container_node_pool" "primary_nodes" {
       env = "${var.gce_project_id}-gke"
     }
 
-    machine_type = "n1-standard-1"
+    machine_type = var.machine_type 
     tags         = ["gke-node", "${var.name}-gke"]
     metadata = {
       disable-legacy-endpoints = "true"
     }
+  }
+  lifecycle {
+    ignore_changes = [
+      node_count 
+    ]
   }
 }
