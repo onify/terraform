@@ -52,6 +52,9 @@ resource "kubernetes_service" "onify-hub-functions" {
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+    annotations = {
+      "cloud.google.com/neg" = jsonencode({ ingress : true })
+    }
   }
   spec {
     selector = {
@@ -72,6 +75,9 @@ resource "kubernetes_service" "onify-hub-functions-alias" {
   metadata {
     name      = "hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+    annotations = {
+      "cloud.google.com/neg" = jsonencode({ ingress : true })
+    }
   }
   spec {
     selector = {

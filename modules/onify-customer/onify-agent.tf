@@ -54,6 +54,7 @@ resource "kubernetes_service" "onify-hub-agent" {
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
+      "cloud.google.com/neg"                = jsonencode({ ingress : true })
     }
   }
   spec {

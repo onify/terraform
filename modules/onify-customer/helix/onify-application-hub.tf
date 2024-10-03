@@ -42,7 +42,7 @@ resource "kubernetes_stateful_set" "onify-hub-app" {
             }
           }
           env {
-            name =  "ONIFY_api_internalUrl" 
+            name  = "ONIFY_api_internalUrl"
             value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
           }
         }
@@ -57,6 +57,7 @@ resource "kubernetes_service" "onify-hub-app" {
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
+      "cloud.google.com/neg"                = jsonencode({ ingress : true })
     }
   }
   spec {

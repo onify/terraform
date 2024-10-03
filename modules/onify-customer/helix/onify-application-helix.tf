@@ -53,7 +53,7 @@ resource "kubernetes_stateful_set" "onify-helix-app" {
             }
           }
           env {
-            name =  "ONIFY_api_internalUrl" 
+            name  = "ONIFY_api_internalUrl"
             value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
           }
         }
@@ -68,6 +68,7 @@ resource "kubernetes_service" "onify-helix-app" {
     namespace = "${local.client_code}-${local.onify_instance}"
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
+      "cloud.google.com/neg"                = jsonencode({ ingress : true })
     }
   }
   spec {
@@ -94,12 +95,13 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-${var.tls}"
       "nginx.ingress.kubernetes.io/proxy-read-timeout" = "300"
       "nginx.ingress.kubernetes.io/proxy-send-timeout" = "300"
+
     }
   }
   spec {
     tls {
       hosts       = ["${local.client_code}-${local.onify_instance}.${var.external_dns_domain}"]
-      secret_name = var.onify_hub_app_tls != null ? var.onify_hub_app_tls :  "tls-secret-app-${var.tls}"
+      secret_name = var.onify_hub_app_tls != null ? var.onify_hub_app_tls : "tls-secret-app-${var.tls}"
     }
     dynamic "tls" {
       for_each = var.custom_hostname != null ? toset(var.custom_hostname) : []
@@ -133,7 +135,7 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
               }
             }
           }
-          path      = var.helix_path 
+          path      = var.helix_path
           path_type = "Prefix"
         }
       }
