@@ -80,9 +80,13 @@ resource "kubernetes_ingress_v1" "onify-name" {
     name      = "${var.client_code}-${var.client_instance}-${var.name}"
     namespace = "${var.client_code}-${var.client_instance}"
     annotations = {
-      "cert-manager.io/cluster-issuer"                 = "letsencrypt-${var.tls}"
-      "nginx.ingress.kubernetes.io/proxy-read-timeout" = "300"
-      "nginx.ingress.kubernetes.io/proxy-send-timeout" = "300"
+      "cert-manager.io/cluster-issuer"                    = "letsencrypt-${var.tls}"
+      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = "300"
+      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = "300"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
+      "nginx.ingress.kubernetes.io/ssl-redirect"          = "true" 
+      "nginx.ingress.kubernetes.io/permanent-redirect"    = "https://$host$request_uri"
+      "nginx.ingress.kubernetes.io/configuration-snippet" = "more_set_headers \"Content-Security-Policy: upgrade-insecure-requests; block-all-mixed-content\";"
     }
   }
   spec {
