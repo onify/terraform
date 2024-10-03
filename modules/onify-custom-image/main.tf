@@ -106,7 +106,7 @@ resource "kubernetes_ingress_v1" "onify-name" {
             service {
               name = "${var.client_code}-${var.client_instance}-${var.name}"
               port {
-                number = 80
+                number = var.port
               }
             }
           }
@@ -123,7 +123,7 @@ resource "kubernetes_ingress_v1" "onify-name" {
               service {
                 name = "${var.client_code}-${var.client_instance}-${var.name}"
                 port {
-                  number = 80
+                  number = var.port
                 }
               }
             }
