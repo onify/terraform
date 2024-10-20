@@ -1,8 +1,8 @@
 
 
-## elasticsearch backup
+# elasticsearch backup
 
-# prerequisites
+### prerequisites
 requires kubectl locally
 
 To enable elasticsearch backup add variable:
