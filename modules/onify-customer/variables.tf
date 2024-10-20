@@ -52,6 +52,12 @@ variable "custom_hostname" {
 variable "elasticsearch_external" {
   default = false
 }
+variable "elasticsearch_backup_enabled" {
+  default = false
+}
+variable "elasticsearch_backup_schedule" {
+  default = "0 30 1 * * ?"
+}
 variable "tls" {
   default = "prod"
 }

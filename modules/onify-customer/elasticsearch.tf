@@ -19,6 +19,28 @@ resource "kubernetes_persistent_volume" "local" {
   depends_on = [kubernetes_namespace.customer_namespace]
 }
 
+
+resource "kubernetes_persistent_volume" "elasticsearch_backup" {
+  count = var.elasticsearch_backup_enabled ? 1 : 0
+  metadata {
+    name = "${local.client_code}-${local.onify_instance}-backup"
+  }
+  spec {
+    storage_class_name = "local"
+    capacity = {
+      storage = var.elasticsearch_disksize
+    }
+    persistent_volume_reclaim_policy = "Retain"
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_source {
+      host_path {
+        path = "/usr/share/elasticsearch/backup"
+      }
+    }
+  }
+  depends_on = [kubernetes_namespace.customer_namespace]
+}
+
 resource "kubernetes_service" "elasticsearch" {
   count = var.elasticsearch_address != null ? 0 : 1
   metadata {
@@ -26,6 +48,10 @@ resource "kubernetes_service" "elasticsearch" {
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
       app = "${local.client_code}-${local.onify_instance}"
+    }
+    annotations = {
+      "cloud.google.com/load-balancer-type" = "Internal"
+      "cloud.google.com/neg"                = jsonencode({ ingress : true })
     }
   }
   spec {
@@ -106,9 +132,23 @@ resource "kubernetes_stateful_set" "elasticsearch" {
               value = "-Xms${var.elasticsearch_heapsize} -Xmx${var.elasticsearch_heapsize}"
             }
           }
+          dynamic "env" {
+            for_each = var.elasticsearch_backup_enabled ? [1] : []
+            content {
+              name  = "path.repo"
+              value = "/usr/share/elasticsearch/backup"
+            }
+          }
           volume_mount {
             name       = "${local.client_code}-${local.onify_instance}-data"
             mount_path = "/usr/share/elasticsearch/data"
+          }
+          dynamic "volume_mount" {
+            for_each = var.elasticsearch_backup_enabled ? [1] : []
+            content {
+              name       = "${local.client_code}-${local.onify_instance}-backup"
+              mount_path = "/usr/share/elasticsearch/backup"
+            }
           }
         }
         termination_grace_period_seconds = 300
@@ -131,6 +171,23 @@ resource "kubernetes_stateful_set" "elasticsearch" {
         resources {
           requests = {
             storage = var.elasticsearch_disksize
+          }
+        }
+      }
+    }
+    dynamic "volume_claim_template" {
+      for_each = var.elasticsearch_backup_enabled ? [1] : []
+      content {
+        metadata {
+          name = "${local.client_code}-${local.onify_instance}-backup"
+        }
+        spec {
+          access_modes       = ["ReadWriteOnce"]
+          storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
+          resources {
+            requests = {
+              storage = var.elasticsearch_disksize
+            }
           }
         }
       }
@@ -173,3 +230,88 @@ resource "kubernetes_ingress_v1" "onify-elasticsearch" {
   depends_on = [kubernetes_namespace.customer_namespace]
 }
 
+resource "null_resource" "wait_for_elasticsearch" {
+  count = var.elasticsearch_backup_enabled ? 1 : 0
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOF
+until kubectl exec ${local.client_code}-${local.onify_instance}-elasticsearch-0 -n ${kubernetes_namespace.customer_namespace.metadata.0.name} -- curl -s localhost:9200; do sleep 20; done
+EOF
+  }
+
+  depends_on = [
+    kubernetes_stateful_set.elasticsearch,
+    kubernetes_service.elasticsearch,
+    kubernetes_namespace.customer_namespace
+  ]
+}
+
+
+resource "null_resource" "slm_policy" {
+  count = var.elasticsearch_backup_enabled ? 1 : 0
+  ## uncomment below for debugging, will always run
+  #triggers = {
+  #  always_run = timestamp()
+  #}
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOF
+kubectl exec ${local.client_code}-${local.onify_instance}-elasticsearch-0 -n ${kubernetes_namespace.customer_namespace.metadata.0.name} -it -- curl -s \
+ -X PUT \
+ "http://${local.client_code}-${local.onify_instance}-elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_snapshot/backup_repo" \
+ -H "Content-Type: application/json" -d '{
+    "type": "fs",
+    "settings": {
+      "location": "/usr/share/elasticsearch/backup"
+    }
+  }'
+EOF
+  }
+  depends_on = [
+    null_resource.wait_for_elasticsearch,
+    kubernetes_stateful_set.elasticsearch,
+    kubernetes_service.elasticsearch,
+    kubernetes_namespace.customer_namespace
+  ]
+}
+
+resource "null_resource" "slm_policy_schedule" {
+  count = var.elasticsearch_backup_enabled ? 1 : 0
+  triggers = {
+    #will only run if the schedule changes
+    schedule = var.elasticsearch_backup_schedule
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOF
+kubectl exec ${local.client_code}-${local.onify_instance}-elasticsearch-0 -n ${kubernetes_namespace.customer_namespace.metadata.0.name} -it -- curl -s \
+  -X PUT "http://${local.client_code}-${local.onify_instance}-elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_slm/policy/daily-snapshot?pretty" -H "Content-Type: application/json" -d '{
+  "schedule": "${var.elasticsearch_backup_schedule}",
+  "name": "<daily-snapshot-{now/d}>",
+  "repository": "backup_repo",
+  "config": {
+    "indices": ["*"],
+    "ignore_unavailable": true,
+    "include_global_state": false
+  },
+  "retention": {
+    "expire_after": "30d",
+    "min_count": 5,
+    "max_count": 50
+  }
+}'
+EOF
+  }
+  depends_on = [
+    null_resource.slm_policy,
+    kubernetes_stateful_set.elasticsearch,
+    kubernetes_service.elasticsearch,
+    kubernetes_namespace.customer_namespace
+  ]
+}
