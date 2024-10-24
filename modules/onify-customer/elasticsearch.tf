@@ -232,9 +232,9 @@ resource "kubernetes_ingress_v1" "onify-elasticsearch" {
 
 resource "null_resource" "wait_for_elasticsearch" {
   count = var.elasticsearch_backup_enabled ? 1 : 0
-  triggers = {
-    always_run = timestamp()
-  }
+  #triggers = {
+  #  always_run = timestamp()
+  #}
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
