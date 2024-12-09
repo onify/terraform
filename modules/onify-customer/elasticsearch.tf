@@ -19,7 +19,6 @@ resource "kubernetes_persistent_volume" "local" {
   depends_on = [kubernetes_namespace.customer_namespace]
 }
 
-
 resource "kubernetes_persistent_volume" "elasticsearch_backup" {
   count = var.elasticsearch_backup_enabled ? 1 : 0
   metadata {
@@ -73,6 +72,49 @@ resource "kubernetes_service" "elasticsearch" {
   depends_on = [kubernetes_namespace.customer_namespace]
 }
 
+resource "kubernetes_persistent_volume_claim" "elasticsearch_data" {
+  count = var.elasticsearch_address != null ? 0 : 1
+  metadata {
+    name      = "${local.client_code}-${local.onify_instance}-data-${local.client_code}-${local.onify_instance}-elasticsearch-0"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+  }
+  spec {
+    access_modes       = ["ReadWriteOnce"]
+    storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
+    resources {
+      requests = {
+        storage = var.elasticsearch_disksize
+      }
+    }
+    volume_name = kubernetes_persistent_volume.local[0].metadata[0].name
+  }
+  depends_on = [
+    kubernetes_namespace.customer_namespace,
+    kubernetes_persistent_volume.local
+  ]
+}
+
+resource "kubernetes_persistent_volume_claim" "elasticsearch_backup" {
+  count = var.elasticsearch_backup_enabled ? 1 : 0
+  metadata {
+    name      = "${local.client_code}-${local.onify_instance}-backup-${local.client_code}-${local.onify_instance}-elasticsearch-0"
+    namespace = kubernetes_namespace.customer_namespace.metadata.0.name
+  }
+  spec {
+    access_modes       = ["ReadWriteOnce"]
+    storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
+    resources {
+      requests = {
+        storage = var.elasticsearch_disksize
+      }
+    }
+    volume_name = kubernetes_persistent_volume.elasticsearch_backup[0].metadata[0].name
+  }
+  depends_on = [
+    kubernetes_namespace.customer_namespace,
+    kubernetes_persistent_volume.elasticsearch_backup
+  ]
+}
 
 resource "kubernetes_stateful_set" "elasticsearch" {
   count = var.elasticsearch_address != null ? 0 : 1
@@ -108,7 +150,6 @@ resource "kubernetes_stateful_set" "elasticsearch" {
         container {
           name  = "${local.client_code}-${local.onify_instance}-elasticsearch"
           image = "docker.elastic.co/elasticsearch/elasticsearch:${var.elasticsearch_version}"
-
           port {
             name           = "nodes"
             container_port = 9300
@@ -152,6 +193,23 @@ resource "kubernetes_stateful_set" "elasticsearch" {
           }
         }
         termination_grace_period_seconds = 300
+
+        volume {
+          name = "${local.client_code}-${local.onify_instance}-data"
+          persistent_volume_claim {
+            claim_name = kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name
+          }
+        }
+
+        dynamic "volume" {
+          for_each = var.elasticsearch_backup_enabled ? [1] : []
+          content {
+            name = "${local.client_code}-${local.onify_instance}-backup"
+            persistent_volume_claim {
+              claim_name = kubernetes_persistent_volume_claim.elasticsearch_backup[0].metadata[0].name
+            }
+          }
+        }
       }
     }
     update_strategy {
@@ -161,40 +219,10 @@ resource "kubernetes_stateful_set" "elasticsearch" {
         partition = 1
       }
     }
-    volume_claim_template {
-      metadata {
-        name = "${local.client_code}-${local.onify_instance}-data"
-      }
-      spec {
-        access_modes       = ["ReadWriteOnce"]
-        storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
-        resources {
-          requests = {
-            storage = var.elasticsearch_disksize
-          }
-        }
-      }
-    }
-    dynamic "volume_claim_template" {
-      for_each = var.elasticsearch_backup_enabled ? [1] : []
-      content {
-        metadata {
-          name = "${local.client_code}-${local.onify_instance}-backup"
-        }
-        spec {
-          access_modes       = ["ReadWriteOnce"]
-          storage_class_name = var.gke ? "" : "local" #use ssd for faster disks
-          resources {
-            requests = {
-              storage = var.elasticsearch_disksize
-            }
-          }
-        }
-      }
-    }
   }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_persistent_volume.local]
 }
+
 resource "kubernetes_ingress_v1" "onify-elasticsearch" {
   count                  = var.elasticsearch_external ? 1 : 0
   wait_for_load_balancer = false
@@ -249,7 +277,6 @@ EOF
     kubernetes_namespace.customer_namespace
   ]
 }
-
 
 resource "null_resource" "slm_policy" {
   count = var.elasticsearch_backup_enabled ? 1 : 0
