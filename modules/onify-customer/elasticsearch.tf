@@ -88,6 +88,7 @@ resource "kubernetes_persistent_volume_claim" "elasticsearch_data" {
     }
     volume_name = var.gke ? null : kubernetes_persistent_volume.local[0].metadata[0].name
   }
+  wait_until_bound = var.gke ? false : true
   depends_on = [
     kubernetes_namespace.customer_namespace,
     kubernetes_persistent_volume.local
@@ -110,6 +111,7 @@ resource "kubernetes_persistent_volume_claim" "elasticsearch_backup" {
     }
     volume_name = var.gke ? null : kubernetes_persistent_volume.elasticsearch_backup[0].metadata[0].name
   }
+  wait_until_bound = var.gke ? false : true
   depends_on = [
     kubernetes_namespace.customer_namespace,
     kubernetes_persistent_volume.elasticsearch_backup
