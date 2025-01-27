@@ -1,10 +1,10 @@
 resource "kubernetes_persistent_volume" "local" {
-  count = var.elasticsearch_address != null ? 0 : 1
+  count = var.elasticsearch_address != null || var.gke ? 0 : 1
   metadata {
     name = "${local.client_code}-${local.onify_instance}-data"
   }
   spec {
-    storage_class_name = "local"
+    storage_class_name = var.gke ? "" : "local"
     capacity = {
       storage = var.elasticsearch_disksize
     }
@@ -20,12 +20,12 @@ resource "kubernetes_persistent_volume" "local" {
 }
 
 resource "kubernetes_persistent_volume" "elasticsearch_backup" {
-  count = var.elasticsearch_backup_enabled ? 1 : 0
+  count = var.elasticsearch_backup_enabled && !var.gke && var.elasticsearch_address == null ? 1 : 0
   metadata {
     name = "${local.client_code}-${local.onify_instance}-backup"
   }
   spec {
-    storage_class_name = "local"
+    storage_class_name = var.gke ? "" : "local"
     capacity = {
       storage = var.elasticsearch_disksize
     }
