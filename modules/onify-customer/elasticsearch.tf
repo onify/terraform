@@ -86,7 +86,7 @@ resource "kubernetes_persistent_volume_claim" "elasticsearch_data" {
         storage = var.elasticsearch_disksize
       }
     }
-    volume_name = kubernetes_persistent_volume.local[0].metadata[0].name
+    volume_name = var.gke ? null : kubernetes_persistent_volume.local[0].metadata[0].name
   }
   depends_on = [
     kubernetes_namespace.customer_namespace,
@@ -108,7 +108,7 @@ resource "kubernetes_persistent_volume_claim" "elasticsearch_backup" {
         storage = var.elasticsearch_disksize
       }
     }
-    volume_name = kubernetes_persistent_volume.elasticsearch_backup[0].metadata[0].name
+    volume_name = var.gke ? null : kubernetes_persistent_volume.elasticsearch_backup[0].metadata[0].name
   }
   depends_on = [
     kubernetes_namespace.customer_namespace,
