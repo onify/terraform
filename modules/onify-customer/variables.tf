@@ -89,7 +89,7 @@ variable "onify_hub_api_external" {
   default = true
 }
 variable "onify_hub_functions_external" {
-  default = true
+  default = false 
 }
 variable "onify_hub_agent_external" {
   default = true
