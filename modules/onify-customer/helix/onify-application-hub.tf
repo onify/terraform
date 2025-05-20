@@ -28,8 +28,9 @@ resource "kubernetes_stateful_set" "onify-hub-app" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify_hub_app_image
-          name  = "onfiy-api"
+          image             = var.onify_hub_app_image
+          image_pull_policy = "Always"
+          name              = "onfiy-api"
           port {
             name           = "hub-app"
             container_port = 3000

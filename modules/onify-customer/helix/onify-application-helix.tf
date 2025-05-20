@@ -39,8 +39,9 @@ resource "kubernetes_stateful_set" "onify-helix-app" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify_helix_image
-          name  = "onfiy-helix-app"
+          image             = var.onify_helix_image
+          image_pull_policy = "Always"
+          name              = "onfiy-helix-app"
           port {
             name           = "helix-app"
             container_port = 4000

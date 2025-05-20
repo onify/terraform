@@ -28,8 +28,9 @@ resource "kubernetes_stateful_set" "onify-hub-worker" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify_hub_worker_image
-          name  = "onify-hub-worker"
+          image             = var.onify_hub_worker_image
+          image_pull_policy = "Always"
+          name              = "onify-hub-worker"
           port {
             name           = "hub-worker"
             container_port = 8181

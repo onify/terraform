@@ -41,8 +41,9 @@ resource "kubernetes_stateful_set" "onify-hub-api" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify_hub_api_image
-          name  = "onfiy-hub-api"
+          image             = var.onify_hub_api_image
+          image_pull_policy = "Always"
+          name              = "onfiy-hub-api"
           port {
             name           = "hub-api"
             container_port = 8181
@@ -119,6 +120,7 @@ resource "kubernetes_ingress_v1" "onify-hub-api" {
     ingress_class_name = "nginx"
     rule {
       host = "${local.client_code}-${local.onify_instance}-api.${var.external_dns_domain}"
+
       http {
         path {
           backend {

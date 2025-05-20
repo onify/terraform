@@ -150,8 +150,9 @@ resource "kubernetes_stateful_set" "elasticsearch" {
           run_as_non_root = true
         }
         container {
-          name  = "${local.client_code}-${local.onify_instance}-elasticsearch"
-          image = "docker.elastic.co/elasticsearch/elasticsearch:${var.elasticsearch_version}"
+          name              = "${local.client_code}-${local.onify_instance}-elasticsearch"
+          image             = "docker.elastic.co/elasticsearch/elasticsearch:${var.elasticsearch_version}"
+          image_pull_policy = "Always"
           port {
             name           = "nodes"
             container_port = 9300

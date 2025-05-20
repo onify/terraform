@@ -28,8 +28,9 @@ resource "kubernetes_stateful_set" "onify-hub-functions" {
           name = "onify-regcred"
         }
         container {
-          image = var.onify_hub_functions_image
-          name  = "onfiy-hub-functions"
+          image             = var.onify_hub_functions_image
+          image_pull_policy = "Always"
+          name              = "onfiy-hub-functions"
           port {
             name           = "hub-functions"
             container_port = 8282
