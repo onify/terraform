@@ -106,61 +106,91 @@ variable "elasticsearch_disksize" {
   default = "10Gi"
 }
 variable "elasticsearch_memory_limit" {
-  default = "1Gi"
+  default = null
 }
 variable "elasticsearch_memory_requests" {
-  default = "1Gi"
+  default = null
+}
+variable "elasticsearch_cpu_limit" {
+  default = null
+}
+variable "elasticsearch_cpu_requests" {
+  default = null
 }
 variable "elasticsearch_version" {
   default = "7.16.1"
 }
 variable "onify_hub_api_memory_limit" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_api_cpu_limit" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_api_memory_requests" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_api_cpu_requests" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_agent_memory_limit" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_agent_cpu_limit" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_agent_memory_requests" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_agent_cpu_requests" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_worker_memory_limit" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_worker_cpu_limit" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_worker_memory_requests" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_worker_cpu_requests" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_app_memory_limit" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_app_cpu_limit" {
-  default = "100m"
+  default = null
 }
 variable "onify_hub_app_memory_requests" {
-  default = "100Mi"
+  default = null
 }
 variable "onify_hub_app_cpu_requests" {
-  default = "100m"
+  default = null
+}
+variable "onify_hub_functions_memory_limit" {
+  default = null
+}
+variable "onify_hub_functions_cpu_limit" {
+  default = null
+}
+variable "onify_hub_functions_memory_requests" {
+  default = null
+}
+variable "onify_hub_functions_cpu_requests" {
+  default = null
+}
+variable "onify_helix_memory_limit" {
+  default = null
+}
+variable "onify_helix_cpu_limit" {
+  default = null
+}
+variable "onify_helix_memory_requests" {
+  default = null
+}
+variable "onify_helix_cpu_requests" {
+  default = null
 }
 variable "external_dns_domain" {
   default = "onify.io"

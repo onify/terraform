@@ -41,6 +41,7 @@ module "helix" {
   onify_hub_agent_memory_limit     = var.onify_hub_agent_memory_limit
   onify_hub_agent_cpu_limit        = var.onify_hub_agent_cpu_limit
   onify_hub_agent_memory_requests  = var.onify_hub_agent_memory_requests
+  onify_hub_agent_cpu_requests     = var.onify_hub_agent_cpu_requests
   onify_hub_worker_memory_limit    = var.onify_hub_worker_memory_limit
   onify_hub_worker_cpu_limit       = var.onify_hub_worker_cpu_limit
   onify_hub_worker_memory_requests = var.onify_hub_worker_memory_requests
@@ -49,6 +50,10 @@ module "helix" {
   onify_hub_app_cpu_limit          = var.onify_hub_app_cpu_limit
   onify_hub_app_memory_requests    = var.onify_hub_app_memory_requests
   onify_hub_app_cpu_requests       = var.onify_hub_app_cpu_requests
+  onify_helix_memory_limit         = var.onify_helix_memory_limit
+  onify_helix_cpu_limit            = var.onify_helix_cpu_limit
+  onify_helix_memory_requests      = var.onify_helix_memory_requests
+  onify_helix_cpu_requests         = var.onify_helix_cpu_requests
   external_dns_domain              = var.external_dns_domain
   gke                              = var.gke
   onify_hub_agent_envs             = var.onify_hub_agent_envs

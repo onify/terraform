@@ -50,6 +50,19 @@ resource "kubernetes_stateful_set" "onify-hub-app" {
             name =  "ONIFY_api_internalUrl" 
             value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
           }
+          dynamic "resources" {
+            for_each = var.onify_hub_app_memory_limit != null || var.onify_hub_app_cpu_limit != null || var.onify_hub_app_memory_requests != null || var.onify_hub_app_cpu_requests != null ? [1] : []
+            content {
+              limits = var.onify_hub_app_memory_limit != null || var.onify_hub_app_cpu_limit != null ? {
+                memory = var.onify_hub_app_memory_limit
+                cpu    = var.onify_hub_app_cpu_limit
+              } : {}
+              requests = var.onify_hub_app_memory_requests != null || var.onify_hub_app_cpu_requests != null ? {
+                memory = var.onify_hub_app_memory_requests
+                cpu    = var.onify_hub_app_cpu_requests
+              } : {}
+            }
+          }
         }
       }
     }

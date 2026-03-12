@@ -48,6 +48,19 @@ resource "kubernetes_stateful_set" "onify-hub-worker" {
               name = "${local.client_code}-${local.onify_instance}-hub-api"
             }
           }
+          dynamic "resources" {
+            for_each = var.onify_hub_worker_memory_limit != null || var.onify_hub_worker_cpu_limit != null || var.onify_hub_worker_memory_requests != null || var.onify_hub_worker_cpu_requests != null ? [1] : []
+            content {
+              limits = var.onify_hub_worker_memory_limit != null || var.onify_hub_worker_cpu_limit != null ? {
+                memory = var.onify_hub_worker_memory_limit
+                cpu    = var.onify_hub_worker_cpu_limit
+              } : {}
+              requests = var.onify_hub_worker_memory_requests != null || var.onify_hub_worker_cpu_requests != null ? {
+                memory = var.onify_hub_worker_memory_requests
+                cpu    = var.onify_hub_worker_cpu_requests
+              } : {}
+            }
+          }
         }
         node_name = var.kubernetes_node_api_worker != null ? var.kubernetes_node_api_worker : null
       }

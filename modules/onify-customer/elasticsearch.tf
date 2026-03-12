@@ -194,6 +194,19 @@ resource "kubernetes_stateful_set" "elasticsearch" {
               mount_path = "/usr/share/elasticsearch/backup"
             }
           }
+          dynamic "resources" {
+            for_each = var.elasticsearch_memory_limit != null || var.elasticsearch_cpu_limit != null || var.elasticsearch_memory_requests != null || var.elasticsearch_cpu_requests != null ? [1] : []
+            content {
+              limits = var.elasticsearch_memory_limit != null || var.elasticsearch_cpu_limit != null ? {
+                memory = var.elasticsearch_memory_limit
+                cpu    = var.elasticsearch_cpu_limit
+              } : {}
+              requests = var.elasticsearch_memory_requests != null || var.elasticsearch_cpu_requests != null ? {
+                memory = var.elasticsearch_memory_requests
+                cpu    = var.elasticsearch_cpu_requests
+              } : {}
+            }
+          }
         }
         termination_grace_period_seconds = 300
 

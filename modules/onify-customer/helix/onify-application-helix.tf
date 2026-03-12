@@ -57,6 +57,19 @@ resource "kubernetes_stateful_set" "onify-helix-app" {
             name  = "ONIFY_api_internalUrl"
             value = "http://${local.client_code}-${local.onify_instance}-hub-api:8181/api/v2"
           }
+          dynamic "resources" {
+            for_each = var.onify_helix_memory_limit != null || var.onify_helix_cpu_limit != null || var.onify_helix_memory_requests != null || var.onify_helix_cpu_requests != null ? [1] : []
+            content {
+              limits = var.onify_helix_memory_limit != null || var.onify_helix_cpu_limit != null ? {
+                memory = var.onify_helix_memory_limit
+                cpu    = var.onify_helix_cpu_limit
+              } : {}
+              requests = var.onify_helix_memory_requests != null || var.onify_helix_cpu_requests != null ? {
+                memory = var.onify_helix_memory_requests
+                cpu    = var.onify_helix_cpu_requests
+              } : {}
+            }
+          }
         }
       }
     }

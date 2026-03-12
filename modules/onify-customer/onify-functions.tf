@@ -42,6 +42,19 @@ resource "kubernetes_stateful_set" "onify-hub-functions" {
               value = env.value
             }
           }
+          dynamic "resources" {
+            for_each = var.onify_hub_functions_memory_limit != null || var.onify_hub_functions_cpu_limit != null || var.onify_hub_functions_memory_requests != null || var.onify_hub_functions_cpu_requests != null ? [1] : []
+            content {
+              limits = var.onify_hub_functions_memory_limit != null || var.onify_hub_functions_cpu_limit != null ? {
+                memory = var.onify_hub_functions_memory_limit
+                cpu    = var.onify_hub_functions_cpu_limit
+              } : {}
+              requests = var.onify_hub_functions_memory_requests != null || var.onify_hub_functions_cpu_requests != null ? {
+                memory = var.onify_hub_functions_memory_requests
+                cpu    = var.onify_hub_functions_cpu_requests
+              } : {}
+            }
+          }
         }
       }
     }
