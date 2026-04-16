@@ -71,6 +71,13 @@ resource "kubernetes_stateful_set" "elasticsearch" {
             name  = "discovery.type"
             value = "single-node"
           }
+          dynamic "env" {
+            for_each = tonumber(split(".", var.elasticsearch_version)[0]) >= 8 ? [1] : []
+            content {
+              name  = "xpack.security.enabled"
+              value = tostring(var.elasticsearch_xpack_security_enabled)
+            }
+          }
           env {
             name  = "cluster.name"
             value = "onify-elasticsearch"

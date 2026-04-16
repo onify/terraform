@@ -118,7 +118,11 @@ variable "elasticsearch_cpu_requests" {
   default = null
 }
 variable "elasticsearch_version" {
-  default = "7.16.1"
+  default = "7.17.29"
+}
+variable "elasticsearch_xpack_security_enabled" {
+  type    = bool
+  default = false
 }
 variable "onify_hub_api_memory_limit" {
   default = null

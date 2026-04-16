@@ -31,7 +31,11 @@ variable "elasticsearch_memory_requests" {
     default = "1Gi"
 }
 variable "elasticsearch_version" {
-    default = "7.16.1"
+    default = "7.17.29"
+}
+variable "elasticsearch_xpack_security_enabled" {
+    type    = bool
+    default = false
 }
 variable "onify-api_memory_limit" {
     default = "250Mi"
