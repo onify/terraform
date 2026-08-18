@@ -47,7 +47,12 @@ resource "kubernetes_stateful_set" "onify-helix-app" {
             container_port = 4000
           }
           dynamic "env" {
-            for_each = var.onify_app_helix_envs
+            for_each = merge(
+              var.onify_app_helix_envs,
+              var.helix_only ? {
+                ONIFY_API_URL_INTERNAL = "http://${local.client_code}-${local.onify_instance}-hub-api:8181"
+              } : {}
+            )
             content {
               name  = env.key
               value = env.value
@@ -72,6 +77,13 @@ resource "kubernetes_stateful_set" "onify-helix-app" {
           }
         }
       }
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = !var.helix_only || var.helix
+      error_message = "helix_only requires helix = true."
     }
   }
 }
@@ -131,11 +143,12 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-hub-app"
+              name = var.helix_only ? "${local.client_code}-${local.onify_instance}-helix-app" : "${local.client_code}-${local.onify_instance}-hub-app"
               port {
-                number = 3000
+                number = var.helix_only ? 4000 : 3000
               }
             }
+
           }
           path      = var.hub_app_path
           path_type = "Prefix"
@@ -162,9 +175,9 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-hub-app"
+                name = var.helix_only ? "${local.client_code}-${local.onify_instance}-helix-app" : "${local.client_code}-${local.onify_instance}-hub-app"
                 port {
-                  number = 3000
+                  number = var.helix_only ? 4000 : 3000
                 }
               }
             }
@@ -187,6 +200,6 @@ resource "kubernetes_ingress_v1" "onify-helix-app" {
       }
     }
   }
-  depends_on = [kubernetes_service.onify-helix-app]
+  depends_on = [kubernetes_service.onify-helix-app, kubernetes_service.onify-hub-app]
 }
 

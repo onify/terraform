@@ -5,6 +5,7 @@ module "helix" {
 
   kubernetes_node_api_worker       = var.kubernetes_node_api_worker
   helix                            = var.helix
+  helix_only                       = var.helix_only
   helix_path                       = var.helix_path
   hub_app_path                     = var.hub_app_path
   ingress                          = var.ingress

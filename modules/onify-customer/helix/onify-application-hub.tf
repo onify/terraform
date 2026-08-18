@@ -1,4 +1,6 @@
 resource "kubernetes_stateful_set" "onify-hub-app" {
+  count = var.helix_only ? 0 : 1
+
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-app"
     namespace = "${local.client_code}-${local.onify_instance}"
@@ -66,6 +68,8 @@ resource "kubernetes_stateful_set" "onify-hub-app" {
 }
 
 resource "kubernetes_service" "onify-hub-app" {
+  count = var.helix_only ? 0 : 1
+
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-app"
     namespace = "${local.client_code}-${local.onify_instance}"

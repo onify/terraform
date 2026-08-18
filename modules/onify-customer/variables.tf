@@ -16,6 +16,11 @@ variable "helix_path" {
 variable "helix" {
   default = true
 }
+variable "helix_only" {
+  description = "Route both / and /helix to Helix and omit the legacy app workload. Requires helix = true."
+  type        = bool
+  default     = false
+}
 variable "ingress" {
   default = true
 }
