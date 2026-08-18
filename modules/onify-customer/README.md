@@ -31,7 +31,7 @@ The module supports these modes. `helix_only` is opt-in and defaults to `false`.
 | Hybrid (default when Helix is enabled) | `helix = true`, `helix_only = false` | The legacy app owns `/`; Helix owns `/helix`. |
 | Helix only | `helix = true`, `helix_only = true` | The legacy app is absent; Helix owns both `/` and `/helix`. |
 
-`helix_only = true` is rejected unless `helix = true`. Running the module tests requires Terraform 1.7 or later because they use mocked providers; the deployed module retains its existing `> 1.5` compatibility constraint.
+`helix_only = true` is rejected unless `helix = true`. Running the module tests requires Terraform 1.11.4 or later because their mocked providers use `override_during = plan`; the deployed module retains its existing `> 1.5` compatibility constraint.
 
 Set the following only after the selected Helix image has been built for root-path proxy operation:
 
