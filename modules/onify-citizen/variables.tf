@@ -53,11 +53,11 @@ variable "onify_gateway_image" {
   }
 }
 variable "onify_gateway_envs" {
-  description = "Environment variables for Gateway. The application must listen on port 3000."
+  description = "Environment variables for Gateway. PORT is fixed to 8686."
   type        = map(string)
   default = {
     NODE_ENV = "production"
-    PORT     = "3000"
+    PORT     = "8686"
   }
   nullable = false
 }

@@ -41,12 +41,12 @@ resource "kubernetes_deployment_v1" "onify-gateway" {
 
           port {
             name           = "gateway"
-            container_port = 3000
+            container_port = 8686
             protocol       = "TCP"
           }
 
           dynamic "env" {
-            for_each = var.onify_gateway_envs
+            for_each = merge(var.onify_gateway_envs, { PORT = "8686" })
             content {
               name  = env.key
               value = env.value
