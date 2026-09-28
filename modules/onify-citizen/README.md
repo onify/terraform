@@ -2,8 +2,8 @@
 
 Onify Citizen runs one Helix frontend, API, worker, Functions, and an optional
 Gateway in the `<client>-<instance>` Kubernetes namespace. Elasticsearch
-stores the customer's data. The frontend is browser based; the module does not
-inject an internal API or app URL into it.
+stores the customer's data. The browser uses same-origin routes; the module
+sets `ONIFY_API_URL_INTERNAL` for the frontend container's NGINX proxy.
 
 | Component | Image input | Kubernetes name | Port |
 |---|---|---|---|
@@ -11,7 +11,7 @@ inject an internal API or app URL into it.
 | App | `onify_app_image` | `<client>-<instance>-app` | 4000, routed at `/` |
 | Worker | `onify_worker_image` (defaults to API image) | `<client>-<instance>-worker` | background process |
 | Functions | `onify_functions_image` | `<client>-<instance>-functions` | 8282 |
-| Gateway | `onify_gateway_image` (optional) | `<client>-<instance>-gateway` | Service 8686 → container 3000 |
+| Gateway | `onify_gateway_image` (optional) | `<client>-<instance>-gateway` | Service and container 8686 |
 | Elasticsearch | `elasticsearch_version` | `<client>-<instance>-elasticsearch` | 9200 |
 
 Set `onify_api_envs.ONIFY_client_code`, `ONIFY_client_instance`, and

@@ -15,6 +15,7 @@ variables {
     ONIFY_client_code     = "example"
     ONIFY_client_instance = "prod"
   }
+  onify_app_envs  = { ONIFY_API_URL_INTERNAL = "http://caller-owned" }
   custom_hostname = ["portal"]
 }
 
@@ -43,8 +44,10 @@ run "app_owns_root_route" {
   }
 
   assert {
-    condition     = length(kubernetes_stateful_set.onify-app.spec[0].template[0].spec[0].container[0].env) == 0
-    error_message = "Helix must not receive an injected internal API or app URL."
+    condition = tomap({
+      for env in kubernetes_stateful_set.onify-app.spec[0].template[0].spec[0].container[0].env : env.name => env.value
+    }) == tomap({ ONIFY_API_URL_INTERNAL = "http://example-prod-api:8181" })
+    error_message = "The root proxy must receive the Citizen API URL, even when a caller supplies a different one."
   }
 
   assert {

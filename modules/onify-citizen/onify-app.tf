@@ -36,7 +36,9 @@ resource "kubernetes_stateful_set" "onify-app" {
             container_port = 4000
           }
           dynamic "env" {
-            for_each = var.onify_app_envs
+            for_each = merge(var.onify_app_envs, {
+              ONIFY_API_URL_INTERNAL = "http://${local.client_code}-${local.onify_instance}-api:8181"
+            })
             content {
               name  = env.key
               value = env.value
