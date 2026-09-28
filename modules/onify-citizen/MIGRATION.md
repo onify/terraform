@@ -1,9 +1,11 @@
 # Convert Onify Customer to Onify Citizen
 
-Citizen keeps the existing namespace and Elasticsearch resources so their
-Terraform state and data volumes stay attached. Other workloads are replaced
-with the simplified names. Plan a cutover window for the frontend and API.
-Update callers that used the old Functions or Gateway Service names and any
+Citizen keeps the existing namespace, Elasticsearch StatefulSet, and storage
+resources so their Terraform state and data volumes stay attached. Other
+workloads are replaced with the simplified names. Plan a cutover window for the
+frontend and API.
+Update callers that used the old Service names; Citizen uses `app`, `api`,
+`functions`, `gateway`, and `elasticsearch` within each namespace. Update any
 external Functions hostname. The API hostname stays the same, but its Ingress
 and backend are replaced during the cutover.
 
@@ -54,10 +56,14 @@ terraform plan
 ```
 
 Expect the old app, API, worker, Functions, Agent, and their Services or
-Ingresses to be removed or replaced. Expect creation of the Citizen app, API,
-worker, Functions, and optionally Gateway. The image pull-secret also drops
-the old registry entry. The namespace, Elasticsearch StatefulSet, data and
-backup PVCs, and local PVs (when used) must show **no destroy or replace**.
+Ingresses to be removed or replaced. The Elasticsearch Service is renamed;
+Terraform creates the new Service before deleting the old one. Its ClusterIP
+and allocated NodePorts can change. The Elasticsearch StatefulSet retains its
+existing `serviceName` to avoid replacement.
+Expect creation of the Citizen app, API, worker, Functions, and optionally
+Gateway. The image pull-secret also drops the old registry entry. The namespace,
+Elasticsearch StatefulSet, data and backup PVCs, and local PVs (when used) must
+show **no destroy or replace**.
 Stop if the plan proposes that; correct the input values, backend/workspace,
 or provider target before applying. `prevent_destroy` guards the namespace and
 Elasticsearch volumes while their resource configuration remains present.

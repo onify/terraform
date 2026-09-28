@@ -60,9 +60,10 @@ resource "kubernetes_deployment_v1" "onify-gateway" {
 
 resource "kubernetes_service_v1" "onify-gateway" {
   count = var.onify_gateway_image != null ? 1 : 0
+  lifecycle { create_before_destroy = true }
 
   metadata {
-    name      = local.gateway_name
+    name      = "gateway"
     namespace = kubernetes_namespace.customer_namespace.metadata[0].name
     labels = {
       app = local.gateway_name

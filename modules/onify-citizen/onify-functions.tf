@@ -63,8 +63,9 @@ resource "kubernetes_stateful_set" "onify-functions" {
 }
 
 resource "kubernetes_service" "onify-functions" {
+  lifecycle { create_before_destroy = true }
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-functions"
+    name      = "functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/neg" = jsonencode({ ingress : true })
@@ -82,7 +83,6 @@ resource "kubernetes_service" "onify-functions" {
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 resource "kubernetes_ingress_v1" "onify-functions" {
@@ -114,7 +114,7 @@ resource "kubernetes_ingress_v1" "onify-functions" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-functions"
+              name = kubernetes_service.onify-functions.metadata[0].name
               port {
                 number = 8282
               }
@@ -131,7 +131,7 @@ resource "kubernetes_ingress_v1" "onify-functions" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-functions"
+                name = kubernetes_service.onify-functions.metadata[0].name
                 port {
                   number = 8282
                 }

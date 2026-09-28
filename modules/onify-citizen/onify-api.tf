@@ -5,9 +5,9 @@ resource "kubernetes_config_map" "onify-api" {
   }
 
   data = {
-    ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://${local.client_code}-${local.onify_instance}-elasticsearch:9200"
+    ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://elasticsearch:9200"
   }
-  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
+  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify, kubernetes_service.elasticsearch]
 }
 
 resource "kubernetes_stateful_set" "onify-api" {
@@ -30,6 +30,9 @@ resource "kubernetes_stateful_set" "onify-api" {
     }
     template {
       metadata {
+        annotations = {
+          "checksum/api-config" = sha256(jsonencode(kubernetes_config_map.onify-api.data))
+        }
         labels = {
           app  = "${local.client_code}-${local.onify_instance}-api"
           task = "${local.client_code}-${local.onify_instance}-api"
@@ -81,8 +84,9 @@ resource "kubernetes_stateful_set" "onify-api" {
 }
 
 resource "kubernetes_service" "onify-api" {
+  lifecycle { create_before_destroy = true }
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-api"
+    name      = "api"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
@@ -101,7 +105,6 @@ resource "kubernetes_service" "onify-api" {
     }
     type = "ClusterIP"
   }
-  depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify]
 }
 
 
@@ -137,7 +140,7 @@ resource "kubernetes_ingress_v1" "onify-api" {
         path {
           backend {
             service {
-              name = "${local.client_code}-${local.onify_instance}-api"
+              name = kubernetes_service.onify-api.metadata[0].name
               port {
                 number = 8181
               }
@@ -154,7 +157,7 @@ resource "kubernetes_ingress_v1" "onify-api" {
           path {
             backend {
               service {
-                name = "${local.client_code}-${local.onify_instance}-api"
+                name = kubernetes_service.onify-api.metadata[0].name
                 port {
                   number = 8181
                 }

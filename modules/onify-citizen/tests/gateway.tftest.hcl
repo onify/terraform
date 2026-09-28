@@ -74,7 +74,7 @@ run "gateway_is_independent_of_functions" {
 
   assert {
     condition = (
-      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "example-test-gateway" &&
+      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "gateway" &&
       kubernetes_service_v1.onify-gateway[0].metadata[0].namespace == "example-test" &&
       kubernetes_service_v1.onify-gateway[0].spec[0].type == "ClusterIP" &&
       kubernetes_service_v1.onify-gateway[0].spec[0].selector == kubernetes_deployment_v1.onify-gateway[0].spec[0].template[0].metadata[0].labels &&
@@ -115,7 +115,7 @@ run "gateway_works_for_another_customer" {
   assert {
     condition = (
       kubernetes_deployment_v1.onify-gateway[0].metadata[0].namespace == "another-prod" &&
-      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "another-prod-gateway" &&
+      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "gateway" &&
       tomap({
         for env in kubernetes_deployment_v1.onify-gateway[0].spec[0].template[0].spec[0].container[0].env : env.name => env.value
       }) == tomap({ NODE_ENV = "production", PORT = "8686" })

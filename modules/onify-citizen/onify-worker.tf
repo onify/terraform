@@ -18,6 +18,9 @@ resource "kubernetes_stateful_set" "onify-worker" {
     }
     template {
       metadata {
+        annotations = {
+          "checksum/api-config" = sha256(jsonencode(kubernetes_config_map.onify-api.data))
+        }
         labels = {
           app  = "${local.client_code}-${local.onify_instance}-worker"
           task = "${local.client_code}-${local.onify_instance}-worker"

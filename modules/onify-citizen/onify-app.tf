@@ -37,7 +37,7 @@ resource "kubernetes_stateful_set" "onify-app" {
           }
           dynamic "env" {
             for_each = merge(var.onify_app_envs, {
-              ONIFY_API_URL_INTERNAL = "http://${local.client_code}-${local.onify_instance}-api:8181"
+              ONIFY_API_URL_INTERNAL = "http://api:8181"
             })
             content {
               name  = env.key
@@ -61,11 +61,13 @@ resource "kubernetes_stateful_set" "onify-app" {
       }
     }
   }
+  depends_on = [kubernetes_service.onify-api]
 }
 
 resource "kubernetes_service" "onify-app" {
+  lifecycle { create_before_destroy = true }
   metadata {
-    name      = "${local.client_code}-${local.onify_instance}-app"
+    name      = "app"
     namespace = kubernetes_namespace.customer_namespace.metadata[0].name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"
@@ -83,7 +85,6 @@ resource "kubernetes_service" "onify-app" {
       protocol = "TCP"
     }
   }
-  depends_on = [kubernetes_stateful_set.onify-app]
 }
 
 resource "kubernetes_ingress_v1" "onify-app" {

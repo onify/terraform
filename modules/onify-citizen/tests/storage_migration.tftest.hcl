@@ -25,6 +25,7 @@ run "gke_keeps_customer_storage_names" {
     condition = (
       kubernetes_namespace.customer_namespace.metadata[0].name == "example-prod" &&
       kubernetes_stateful_set.elasticsearch[0].metadata[0].name == "example-prod-elasticsearch" &&
+      kubernetes_stateful_set.elasticsearch[0].spec[0].service_name == "example-prod-elasticsearch" &&
       kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name == "example-prod-data-example-prod-elasticsearch-0" &&
       kubernetes_stateful_set.elasticsearch[0].spec[0].template[0].spec[0].volume[0].persistent_volume_claim[0].claim_name == kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name &&
       length(kubernetes_persistent_volume.local) == 0
@@ -54,5 +55,21 @@ run "local_backup_keeps_customer_volume_names" {
       kubernetes_stateful_set.elasticsearch[0].spec[0].template[0].spec[0].volume[1].persistent_volume_claim[0].claim_name == kubernetes_persistent_volume_claim.elasticsearch_backup[0].metadata[0].name
     )
     error_message = "Local data and backup volumes must retain their Customer names."
+  }
+}
+
+run "external_elasticsearch_keeps_its_address" {
+  command = plan
+
+  variables {
+    elasticsearch_address = "https://search.example:9200"
+  }
+
+  assert {
+    condition = (
+      length(kubernetes_service.elasticsearch) == 0 &&
+      kubernetes_config_map.onify-api.data.ONIFY_db_elasticsearch_host == "https://search.example:9200"
+    )
+    error_message = "An external Elasticsearch address must not create an internal Service."
   }
 }
