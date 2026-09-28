@@ -65,7 +65,7 @@ resource "kubernetes_stateful_set" "onify-functions" {
 resource "kubernetes_service" "onify-functions" {
   lifecycle { create_before_destroy = true }
   metadata {
-    name      = "functions"
+    name      = "${var.service_name_prefix}functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/neg" = jsonencode({ ingress : true })

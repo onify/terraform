@@ -26,6 +26,7 @@ run "gke_keeps_customer_storage_names" {
       kubernetes_namespace.customer_namespace.metadata[0].name == "example-prod" &&
       kubernetes_stateful_set.elasticsearch[0].metadata[0].name == "example-prod-elasticsearch" &&
       kubernetes_stateful_set.elasticsearch[0].spec[0].service_name == "example-prod-elasticsearch" &&
+      kubernetes_service.elasticsearch[0].metadata[0].name == "onify-halo-elasticsearch" &&
       kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name == "example-prod-data-example-prod-elasticsearch-0" &&
       kubernetes_stateful_set.elasticsearch[0].spec[0].template[0].spec[0].volume[0].persistent_volume_claim[0].claim_name == kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name &&
       length(kubernetes_persistent_volume.local) == 0

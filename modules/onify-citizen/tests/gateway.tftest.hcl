@@ -74,7 +74,7 @@ run "gateway_is_independent_of_functions" {
 
   assert {
     condition = (
-      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "gateway" &&
+      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "onify-halo-gateway" &&
       kubernetes_service_v1.onify-gateway[0].metadata[0].namespace == "example-test" &&
       kubernetes_service_v1.onify-gateway[0].spec[0].type == "ClusterIP" &&
       kubernetes_service_v1.onify-gateway[0].spec[0].selector == kubernetes_deployment_v1.onify-gateway[0].spec[0].template[0].metadata[0].labels &&
@@ -106,6 +106,7 @@ run "gateway_works_for_another_customer" {
 
   variables {
     onify_gateway_image = "eu.gcr.io/onify-images/gateway:dev"
+    service_name_prefix = "onify-citizen-"
     onify_api_envs = {
       ONIFY_client_code     = "another"
       ONIFY_client_instance = "prod"
@@ -115,7 +116,7 @@ run "gateway_works_for_another_customer" {
   assert {
     condition = (
       kubernetes_deployment_v1.onify-gateway[0].metadata[0].namespace == "another-prod" &&
-      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "gateway" &&
+      kubernetes_service_v1.onify-gateway[0].metadata[0].name == "onify-citizen-gateway" &&
       tomap({
         for env in kubernetes_deployment_v1.onify-gateway[0].spec[0].template[0].spec[0].container[0].env : env.name => env.value
       }) == tomap({ NODE_ENV = "production", PORT = "8686" })
@@ -148,4 +149,14 @@ run "reject_empty_image_references" {
   }
 
   expect_failures = [var.onify_gateway_image]
+}
+
+run "reject_invalid_service_prefix" {
+  command = plan
+
+  variables {
+    service_name_prefix = "Citizen_"
+  }
+
+  expect_failures = [var.service_name_prefix]
 }

@@ -38,6 +38,17 @@ variable "deployment_replicas" {
 variable "gcr_registry_keyfile" {
   default = null
 }
+variable "service_name_prefix" {
+  description = "Prefix for Kubernetes Service names, including the trailing hyphen."
+  type        = string
+  default     = "onify-halo-"
+  nullable    = false
+
+  validation {
+    condition     = length(var.service_name_prefix) <= 50 && can(regex("^[a-z][a-z0-9-]*-$", var.service_name_prefix))
+    error_message = "service_name_prefix must be a lowercase Kubernetes name prefix ending in a hyphen, up to 50 characters."
+  }
+}
 variable "onify_functions_image" {
   type     = string
   nullable = false

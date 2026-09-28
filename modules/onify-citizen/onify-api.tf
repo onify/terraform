@@ -5,7 +5,7 @@ resource "kubernetes_config_map" "onify-api" {
   }
 
   data = {
-    ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://elasticsearch:9200"
+    ONIFY_db_elasticsearch_host = var.elasticsearch_address != null ? var.elasticsearch_address : "http://${var.service_name_prefix}elasticsearch:9200"
   }
   depends_on = [kubernetes_namespace.customer_namespace, kubernetes_secret.docker-onify, kubernetes_service.elasticsearch]
 }
@@ -86,7 +86,7 @@ resource "kubernetes_stateful_set" "onify-api" {
 resource "kubernetes_service" "onify-api" {
   lifecycle { create_before_destroy = true }
   metadata {
-    name      = "api"
+    name      = "${var.service_name_prefix}api"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"

@@ -63,7 +63,7 @@ resource "kubernetes_service_v1" "onify-gateway" {
   lifecycle { create_before_destroy = true }
 
   metadata {
-    name      = "gateway"
+    name      = "${var.service_name_prefix}gateway"
     namespace = kubernetes_namespace.customer_namespace.metadata[0].name
     labels = {
       app = local.gateway_name
