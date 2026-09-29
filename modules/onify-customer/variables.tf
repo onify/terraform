@@ -75,6 +75,22 @@ variable "gcr_registry_keyfile" {
 variable "onify_hub_functions_image" {
   default = "eu.gcr.io/onify-images/hub/functions:latest"
 }
+variable "onify_hub_gateway_image" {
+  description = "Hub Gateway image. Set to enable the internal gateway service."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.onify_hub_gateway_image == null ? true : trimspace(var.onify_hub_gateway_image) != ""
+    error_message = "onify_hub_gateway_image must be a non-empty image reference, or null to disable the gateway."
+  }
+}
+variable "onify_hub_gateway_envs" {
+  description = "Hub Gateway environment variables. PORT is fixed to 8686."
+  type        = map(string)
+  default     = { NODE_ENV = "production" }
+  nullable    = false
+}
 variable "onify_helix_image" {
   default = "ghcr.io/onify/helix-app-lab:latest"
 }

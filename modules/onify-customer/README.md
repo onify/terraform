@@ -1,5 +1,14 @@
 
 
+# Hub Gateway
+
+Set `onify_hub_gateway_image` to add Hub Gateway to an existing Onify Customer
+installation. It creates only a Deployment and an internal Service named
+`<client>-<instance>-hub-gateway` on port 8686. It is disabled by default.
+Use `onify_hub_gateway_envs` for additional environment variables; `PORT` is
+always 8686. The service is reachable inside the namespace at
+`http://<client>-<instance>-hub-gateway:8686`.
+
 # elasticsearch backup
 
 ### prerequisites
