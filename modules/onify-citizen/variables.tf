@@ -12,10 +12,6 @@ variable "onify_api_tls" {
   type    = string
   default = null
 }
-variable "onify_functions_tls" {
-  type    = string
-  default = null
-}
 variable "custom_hostname" {
   type    = list(string)
   default = null
@@ -49,18 +45,14 @@ variable "service_name_prefix" {
     error_message = "service_name_prefix must be a lowercase Kubernetes name prefix ending in a hyphen, up to 50 characters."
   }
 }
-variable "onify_functions_image" {
-  type     = string
-  nullable = false
-}
 variable "onify_gateway_image" {
-  description = "Gateway image. Set to null to disable the gateway."
+  description = "Gateway image."
   type        = string
-  default     = null
+  nullable    = false
 
   validation {
-    condition     = var.onify_gateway_image == null ? true : trimspace(var.onify_gateway_image) != ""
-    error_message = "onify_gateway_image must be a non-empty image reference, or null to disable the gateway."
+    condition     = trimspace(var.onify_gateway_image) != ""
+    error_message = "onify_gateway_image must be a non-empty image reference."
   }
 }
 variable "onify_gateway_envs" {
@@ -83,9 +75,6 @@ variable "onify_worker_image" {
 }
 variable "onify_api_external" {
   default = true
-}
-variable "onify_functions_external" {
-  default = false
 }
 variable "elasticsearch_address" {
   type    = string
@@ -141,18 +130,6 @@ variable "onify_worker_memory_requests" {
 variable "onify_worker_cpu_requests" {
   default = null
 }
-variable "onify_functions_memory_limit" {
-  default = null
-}
-variable "onify_functions_cpu_limit" {
-  default = null
-}
-variable "onify_functions_memory_requests" {
-  default = null
-}
-variable "onify_functions_cpu_requests" {
-  default = null
-}
 variable "external_dns_domain" {
   default = "onify.io"
 }
@@ -179,13 +156,6 @@ variable "onify_api_envs" {
     ONIFY_adminUser_password   = ""
     ONIFY_apiTokens_app_secret = ""
     ONIFY_client_secret        = ""
-  }
-}
-
-variable "onify_functions_envs" {
-  type = map(string)
-  default = {
-    NODE_ENV = "production"
   }
 }
 

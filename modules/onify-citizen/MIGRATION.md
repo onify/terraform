@@ -5,9 +5,10 @@ resources so their Terraform state and data volumes stay attached. Other
 workloads are replaced with the simplified names. Plan a cutover window for the
 frontend and API.
 Update callers that used the old Service names; Citizen uses the `onify-halo-`
-prefix by default for `app`, `api`, `functions`, `gateway`, and `elasticsearch`
+prefix by default for `app`, `api`, `gateway`, and `elasticsearch`
 within each namespace. Set `service_name_prefix = "onify-citizen-"` in the
-module call to use that prefix instead. Update any external Functions hostname.
+module call to use that prefix instead. Remove any external Functions hostname;
+Gateway has no public Ingress.
 The API hostname stays the same, but its Ingress
 and backend are replaced during the cutover.
 
@@ -33,18 +34,18 @@ Change the module `source` from `//modules/onify-customer` to
 | `onify_hub_api_envs` | `onify_api_envs` (same complete map) |
 | `onify_hub_api_image` | `onify_api_image` (required) |
 | `onify_hub_worker_image` | `onify_worker_image` (omit when it used the API image) |
-| `onify_hub_functions_image` | `onify_functions_image` (required) |
+| `onify_hub_functions_image` | Remove; provide `onify_gateway_image` instead (required) |
 | `onify_helix_image` | `onify_app_image` (required GCR frontend image built for `/`) |
 | `onify_app_helix_envs` | `onify_app_envs` (only values used by the browser frontend) |
-| `onify_halo_gateway_image`, `onify_halo_gateway_envs` | `onify_gateway_image`, `onify_gateway_envs` |
-| `onify_hub_api_*`, `onify_hub_worker_*`, `onify_hub_functions_*` resource, TLS, and access settings | matching `onify_api_*`, `onify_worker_*`, `onify_functions_*` inputs |
+| `onify_hub_gateway_image`, `onify_hub_gateway_envs` | `onify_gateway_image`, `onify_gateway_envs` |
+| `onify_hub_api_*`, `onify_hub_worker_*` resource, TLS, and access settings | matching `onify_api_*`, `onify_worker_*` inputs |
+| `onify_hub_functions_*` settings | Remove; configure Gateway with `onify_gateway_*` inputs |
 | `onify_hub_app_tls` | `onify_app_tls`, when a custom TLS secret is used |
 | `onify_helix_*` resource settings | matching `onify_app_*` settings |
 
 Remove the old app, Agent, mode, path, and GitHub registry arguments. Do not
 carry internal API/app URL environment values into the frontend. The existing
-`/helix` route is removed; Citizen serves the frontend at `/`. Gateway is best
-enabled in a separate plan after the storage-safe cutover. Image pull
+`/helix` route is removed; Citizen serves the frontend at `/`. Image pull
 credentials in Citizen cover GCR only.
 
 ## 3. Check the actual plan
@@ -62,8 +63,8 @@ Ingresses to be removed or replaced. The Elasticsearch Service is renamed;
 Terraform creates the new Service before deleting the old one. Its ClusterIP
 and allocated NodePorts can change. The Elasticsearch StatefulSet retains its
 existing `serviceName` to avoid replacement.
-Expect creation of the Citizen app, API, worker, Functions, and optionally
-Gateway. The image pull-secret also drops the old registry entry. The namespace,
+Expect creation of the Citizen app, API, worker, and Gateway. The image
+pull-secret also drops the old registry entry. The namespace,
 Elasticsearch StatefulSet, data and backup PVCs, and local PVs (when used) must
 show **no destroy or replace**.
 Stop if the plan proposes that; correct the input values, backend/workspace,

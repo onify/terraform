@@ -7,10 +7,10 @@ mock_provider "null" {
 }
 
 variables {
-  gcr_registry_keyfile  = "tests/fixtures/keyfile.json"
-  onify_app_image       = "example/citizen-app:root"
-  onify_api_image       = "example/api:stable"
-  onify_functions_image = "example/functions:stable"
+  gcr_registry_keyfile = "tests/fixtures/keyfile.json"
+  onify_app_image      = "example/citizen-app:root"
+  onify_api_image      = "example/api:stable"
+  onify_gateway_image  = "example/gateway:stable"
   onify_api_envs = {
     ONIFY_client_code     = "example"
     ONIFY_client_instance = "prod"
@@ -35,8 +35,8 @@ run "gke_keeps_customer_storage_names" {
   }
 
   assert {
-    condition     = kubernetes_stateful_set.onify-functions.metadata[0].name == "example-prod-functions"
-    error_message = "Functions must remain alongside the Citizen workloads."
+    condition     = kubernetes_deployment_v1.onify-gateway.metadata[0].name == "example-prod-gateway"
+    error_message = "Gateway must be deployed alongside the Citizen workloads."
   }
 }
 

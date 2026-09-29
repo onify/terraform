@@ -3,8 +3,6 @@ locals {
 }
 
 resource "kubernetes_deployment_v1" "onify-gateway" {
-  count = var.onify_gateway_image != null ? 1 : 0
-
   metadata {
     name      = local.gateway_name
     namespace = kubernetes_namespace.customer_namespace.metadata[0].name
@@ -59,7 +57,6 @@ resource "kubernetes_deployment_v1" "onify-gateway" {
 }
 
 resource "kubernetes_service_v1" "onify-gateway" {
-  count = var.onify_gateway_image != null ? 1 : 0
   lifecycle { create_before_destroy = true }
 
   metadata {

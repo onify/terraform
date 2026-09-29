@@ -7,17 +7,16 @@ mock_provider "null" {
 }
 
 variables {
-  gcr_registry_keyfile  = "tests/fixtures/keyfile.json"
-  onify_app_image       = "example/citizen-app:root"
-  onify_api_image       = "example/api:stable"
-  onify_functions_image = "example/functions:stable"
+  gcr_registry_keyfile = "tests/fixtures/keyfile.json"
+  onify_app_image      = "example/citizen-app:root"
+  onify_api_image      = "example/api:stable"
+  onify_gateway_image  = "example/gateway:stable"
   onify_api_envs = {
     ONIFY_client_code     = "example"
     ONIFY_client_instance = "prod"
   }
-  onify_app_envs           = { ONIFY_API_URL_INTERNAL = "http://caller-owned" }
-  onify_functions_external = true
-  custom_hostname          = ["portal"]
+  onify_app_envs  = { ONIFY_API_URL_INTERNAL = "http://caller-owned" }
+  custom_hostname = ["portal"]
 }
 
 run "app_owns_root_route" {
@@ -56,13 +55,12 @@ run "app_owns_root_route" {
       kubernetes_service.onify-api.metadata[0].name == "onify-halo-api" &&
       kubernetes_stateful_set.onify-worker.metadata[0].name == "example-prod-worker" &&
       kubernetes_stateful_set.onify-worker.spec[0].template[0].spec[0].container[0].image == "example/api:stable" &&
-      kubernetes_service.onify-functions.metadata[0].name == "onify-halo-functions" &&
+      kubernetes_service_v1.onify-gateway.metadata[0].name == "onify-halo-gateway" &&
       kubernetes_service.elasticsearch[0].metadata[0].name == "onify-halo-elasticsearch" &&
       kubernetes_config_map.onify-api.data.ONIFY_db_elasticsearch_host == "http://onify-halo-elasticsearch:9200" &&
       kubernetes_stateful_set.onify-api.spec[0].template[0].metadata[0].annotations["checksum/api-config"] == sha256(jsonencode(kubernetes_config_map.onify-api.data)) &&
       kubernetes_stateful_set.onify-worker.spec[0].template[0].metadata[0].annotations["checksum/api-config"] == sha256(jsonencode(kubernetes_config_map.onify-api.data)) &&
-      alltrue([for rule in kubernetes_ingress_v1.onify-api[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-halo-api"]) &&
-      alltrue([for rule in kubernetes_ingress_v1.onify-functions[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-halo-functions"])
+      alltrue([for rule in kubernetes_ingress_v1.onify-api[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-halo-api"])
     )
     error_message = "Services and their internal callers must use namespace-local names."
   }
@@ -84,13 +82,12 @@ run "custom_service_prefix_updates_internal_routes" {
     condition = (
       kubernetes_service.onify-app.metadata[0].name == "onify-citizen-app" &&
       kubernetes_service.onify-api.metadata[0].name == "onify-citizen-api" &&
-      kubernetes_service.onify-functions.metadata[0].name == "onify-citizen-functions" &&
+      kubernetes_service_v1.onify-gateway.metadata[0].name == "onify-citizen-gateway" &&
       kubernetes_service.elasticsearch[0].metadata[0].name == "onify-citizen-elasticsearch" &&
       tomap({ for env in kubernetes_stateful_set.onify-app.spec[0].template[0].spec[0].container[0].env : env.name => env.value }) == tomap({ ONIFY_API_URL_INTERNAL = "http://onify-citizen-api:8181" }) &&
       kubernetes_config_map.onify-api.data.ONIFY_db_elasticsearch_host == "http://onify-citizen-elasticsearch:9200" &&
       alltrue([for rule in kubernetes_ingress_v1.onify-app[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-citizen-app"]) &&
-      alltrue([for rule in kubernetes_ingress_v1.onify-api[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-citizen-api"]) &&
-      alltrue([for rule in kubernetes_ingress_v1.onify-functions[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-citizen-functions"])
+      alltrue([for rule in kubernetes_ingress_v1.onify-api[0].spec[0].rule : rule.http[0].path[0].backend[0].service[0].name == "onify-citizen-api"])
     )
     error_message = "A custom prefix must update every Service and Ingress backend."
   }
