@@ -3,11 +3,22 @@
 # Hub Gateway
 
 Set `onify_hub_gateway_image` to add Hub Gateway to an existing Onify Customer
-installation. It creates only a Deployment and an internal Service named
-`<client>-<instance>-hub-gateway` on port 8686. It is disabled by default.
+installation. Like Functions, it creates a StatefulSet and two internal Services:
+`<client>-<instance>-hub-gateway` and the alias `hub-gateway`, both on port 8686.
+It is disabled by default.
 Use `onify_hub_gateway_envs` for additional environment variables; `PORT` is
 always 8686. The service is reachable inside the namespace at
-`http://<client>-<instance>-hub-gateway:8686`.
+`http://hub-gateway:8686`.
+
+Use `onify_hub_gateway_memory_limit`, `onify_hub_gateway_cpu_limit`,
+`onify_hub_gateway_memory_requests`, and `onify_hub_gateway_cpu_requests` to
+configure resources, as with Functions. Set `onify_hub_gateway_external = true`
+to add an ingress when `ingress = true`; it uses `tls`, `external_dns_domain`,
+and `custom_hostname` like Functions. Override its TLS secret with
+`onify_hub_gateway_tls`.
+
+Existing gateway Deployments are replaced by StatefulSets on the next apply;
+review the plan for this workload transition before applying.
 
 # elasticsearch backup
 

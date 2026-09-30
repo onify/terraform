@@ -46,6 +46,10 @@ variable "onify_hub_functions_tls" {
   type    = string
   default = null
 }
+variable "onify_hub_gateway_tls" {
+  type    = string
+  default = null
+}
 variable "onify_hub_app_tls" {
   type    = string
   default = null
@@ -76,7 +80,7 @@ variable "onify_hub_functions_image" {
   default = "eu.gcr.io/onify-images/hub/functions:latest"
 }
 variable "onify_hub_gateway_image" {
-  description = "Hub Gateway image. Set to enable the internal gateway service."
+  description = "Hub Gateway image. Set to enable the gateway workload and services."
   type        = string
   default     = null
 
@@ -110,6 +114,9 @@ variable "onify_hub_api_external" {
   default = true
 }
 variable "onify_hub_functions_external" {
+  default = false
+}
+variable "onify_hub_gateway_external" {
   default = false
 }
 variable "onify_hub_agent_external" {
@@ -203,6 +210,18 @@ variable "onify_hub_functions_memory_requests" {
   default = null
 }
 variable "onify_hub_functions_cpu_requests" {
+  default = null
+}
+variable "onify_hub_gateway_memory_limit" {
+  default = null
+}
+variable "onify_hub_gateway_cpu_limit" {
+  default = null
+}
+variable "onify_hub_gateway_memory_requests" {
+  default = null
+}
+variable "onify_hub_gateway_cpu_requests" {
   default = null
 }
 variable "onify_helix_memory_limit" {
