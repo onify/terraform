@@ -26,7 +26,7 @@ run "gke_keeps_customer_storage_names" {
       kubernetes_namespace.customer_namespace.metadata[0].name == "example-prod" &&
       kubernetes_stateful_set.elasticsearch[0].metadata[0].name == "example-prod-elasticsearch" &&
       kubernetes_stateful_set.elasticsearch[0].spec[0].service_name == "example-prod-elasticsearch" &&
-      kubernetes_service.elasticsearch[0].metadata[0].name == "onify-halo-elasticsearch" &&
+      kubernetes_service.elasticsearch[0].metadata[0].name == "onify-citizen-elasticsearch" &&
       kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name == "example-prod-data-example-prod-elasticsearch-0" &&
       kubernetes_stateful_set.elasticsearch[0].spec[0].template[0].spec[0].volume[0].persistent_volume_claim[0].claim_name == kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name &&
       length(kubernetes_persistent_volume.local) == 0
@@ -46,6 +46,7 @@ run "local_backup_keeps_customer_volume_names" {
   variables {
     gke                          = false
     elasticsearch_backup_enabled = true
+    elasticsearch_external       = true
   }
 
   assert {
@@ -56,6 +57,11 @@ run "local_backup_keeps_customer_volume_names" {
       kubernetes_stateful_set.elasticsearch[0].spec[0].template[0].spec[0].volume[1].persistent_volume_claim[0].claim_name == kubernetes_persistent_volume_claim.elasticsearch_backup[0].metadata[0].name
     )
     error_message = "Local data and backup volumes must retain their Customer names."
+  }
+
+  assert {
+    condition     = kubernetes_ingress_v1.onify-elasticsearch[0].spec[0].rule[0].http[0].path[0].backend[0].service[0].name == kubernetes_service.elasticsearch[0].metadata[0].name
+    error_message = "The Elasticsearch Ingress must route to the Citizen Service."
   }
 }
 

@@ -37,7 +37,7 @@ resource "kubernetes_stateful_set" "onify-app" {
           }
           dynamic "env" {
             for_each = merge(var.onify_app_envs, {
-              ONIFY_API_URL_INTERNAL = "http://${var.service_name_prefix}api:8181"
+              ONIFY_API_URL_INTERNAL = "http://onify-citizen-api:8181"
             })
             content {
               name  = env.key
@@ -67,7 +67,7 @@ resource "kubernetes_stateful_set" "onify-app" {
 resource "kubernetes_service" "onify-app" {
   lifecycle { create_before_destroy = true }
   metadata {
-    name      = "${var.service_name_prefix}app"
+    name      = "onify-citizen-app"
     namespace = kubernetes_namespace.customer_namespace.metadata[0].name
     annotations = {
       "cloud.google.com/load-balancer-type" = "Internal"

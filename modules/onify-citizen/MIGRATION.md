@@ -4,10 +4,10 @@ Citizen keeps the existing namespace, Elasticsearch StatefulSet, and storage
 resources so their Terraform state and data volumes stay attached. Other
 workloads are replaced with the simplified names. Plan a cutover window for the
 frontend and API.
-Update callers that used the old Service names; Citizen uses the `onify-halo-`
-prefix by default for `app`, `api`, `gateway`, and `elasticsearch`
-within each namespace. Set `service_name_prefix = "onify-citizen-"` in the
-module call to use that prefix instead. Remove any external Functions hostname;
+Update callers that used the old Service names; Citizen uses the fixed names
+`onify-citizen-app`, `onify-citizen-api`, `onify-citizen-gateway`, and
+`onify-citizen-elasticsearch` within each namespace. Remove any Service naming
+arguments from the module call. Remove any external Functions hostname;
 Gateway has no public Ingress.
 The API hostname stays the same, but its Ingress
 and backend are replaced during the cutover.

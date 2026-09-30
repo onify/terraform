@@ -46,7 +46,7 @@ resource "kubernetes_service" "elasticsearch" {
   count = var.elasticsearch_address != null ? 0 : 1
   lifecycle { create_before_destroy = true }
   metadata {
-    name      = "${var.service_name_prefix}elasticsearch"
+    name      = "onify-citizen-elasticsearch"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
     labels = {
       app = "${local.client_code}-${local.onify_instance}"
@@ -272,7 +272,7 @@ resource "kubernetes_ingress_v1" "onify-elasticsearch" {
         path {
           backend {
             service {
-              name = "${var.service_name_prefix}elasticsearch"
+              name = "onify-citizen-elasticsearch"
               port {
                 number = 9200
               }
@@ -317,7 +317,7 @@ resource "null_resource" "slm_policy" {
     command     = <<EOF
 kubectl exec ${local.client_code}-${local.onify_instance}-elasticsearch-0 -n ${kubernetes_namespace.customer_namespace.metadata.0.name} -it -- curl -s \
  -X PUT \
- "http://${var.service_name_prefix}elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_snapshot/backup_repo" \
+ "http://onify-citizen-elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_snapshot/backup_repo" \
  -H "Content-Type: application/json" -d '{
     "type": "fs",
     "settings": {
@@ -345,7 +345,7 @@ resource "null_resource" "slm_policy_schedule" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<EOF
 kubectl exec ${local.client_code}-${local.onify_instance}-elasticsearch-0 -n ${kubernetes_namespace.customer_namespace.metadata.0.name} -it -- curl -s \
-  -X PUT "http://${var.service_name_prefix}elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_slm/policy/daily-snapshot?pretty" -H "Content-Type: application/json" -d '{
+  -X PUT "http://onify-citizen-elasticsearch.${kubernetes_namespace.customer_namespace.metadata.0.name}.svc.cluster.local:9200/_slm/policy/daily-snapshot?pretty" -H "Content-Type: application/json" -d '{
   "schedule": "${var.elasticsearch_backup_schedule}",
   "name": "<daily-snapshot-{now/d}>",
   "repository": "backup_repo",
