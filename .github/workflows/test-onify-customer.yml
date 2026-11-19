@@ -1,14 +1,16 @@
-name: Test onify-customer module
+name: Test Terraform customer modules
 
 on:
   pull_request:
     paths:
       - "modules/onify-customer/**"
+      - "modules/onify-citizen/**"
       - ".github/workflows/test-onify-customer.yml"
   push:
     branches: [main]
     paths:
       - "modules/onify-customer/**"
+      - "modules/onify-citizen/**"
       - ".github/workflows/test-onify-customer.yml"
 
 permissions:
@@ -16,11 +18,15 @@ permissions:
 
 jobs:
   terraform-linux:
-    name: Terraform 1.11.4 on Linux
+    name: Terraform 1.11.4 on Linux (${{ matrix.module }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [onify-customer, onify-citizen]
     defaults:
       run:
-        working-directory: modules/onify-customer
+        working-directory: modules/${{ matrix.module }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3

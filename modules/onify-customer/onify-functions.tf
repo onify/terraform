@@ -1,4 +1,21 @@
+moved {
+  from = kubernetes_stateful_set.onify-hub-functions
+  to   = kubernetes_stateful_set.onify-hub-functions[0]
+}
+
+moved {
+  from = kubernetes_service.onify-hub-functions
+  to   = kubernetes_service.onify-hub-functions[0]
+}
+
+moved {
+  from = kubernetes_service.onify-hub-functions-alias
+  to   = kubernetes_service.onify-hub-functions-alias[0]
+}
+
 resource "kubernetes_stateful_set" "onify-hub-functions" {
+  count = var.onify_hub_functions_enabled ? 1 : 0
+
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
@@ -63,6 +80,8 @@ resource "kubernetes_stateful_set" "onify-hub-functions" {
 }
 
 resource "kubernetes_service" "onify-hub-functions" {
+  count = var.onify_hub_functions_enabled ? 1 : 0
+
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
@@ -86,6 +105,8 @@ resource "kubernetes_service" "onify-hub-functions" {
 }
 
 resource "kubernetes_service" "onify-hub-functions-alias" {
+  count = var.onify_hub_functions_enabled ? 1 : 0
+
   metadata {
     name      = "hub-functions"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
@@ -109,7 +130,7 @@ resource "kubernetes_service" "onify-hub-functions-alias" {
 }
 
 resource "kubernetes_ingress_v1" "onify-hub-functions" {
-  count                  = var.onify_hub_functions_external && var.ingress ? 1 : 0
+  count                  = var.onify_hub_functions_enabled && var.onify_hub_functions_external && var.ingress ? 1 : 0
   wait_for_load_balancer = false
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-hub-functions"

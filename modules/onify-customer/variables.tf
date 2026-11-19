@@ -46,6 +46,10 @@ variable "onify_hub_functions_tls" {
   type    = string
   default = null
 }
+variable "onify_hub_gateway_tls" {
+  type    = string
+  default = null
+}
 variable "onify_hub_app_tls" {
   type    = string
   default = null
@@ -72,8 +76,30 @@ variable "deployment_replicas" {
 variable "gcr_registry_keyfile" {
   default = null
 }
+variable "onify_hub_functions_enabled" {
+  description = "Deploy the Hub Functions workload, services, and optional ingress."
+  type        = bool
+  default     = true
+  nullable    = false
+}
 variable "onify_hub_functions_image" {
   default = "eu.gcr.io/onify-images/hub/functions:latest"
+}
+variable "onify_hub_gateway_image" {
+  description = "Hub Gateway image. Set to enable the gateway workload and services."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.onify_hub_gateway_image == null ? true : trimspace(var.onify_hub_gateway_image) != ""
+    error_message = "onify_hub_gateway_image must be a non-empty image reference, or null to disable the gateway."
+  }
+}
+variable "onify_hub_gateway_envs" {
+  description = "Hub Gateway environment variables. PORT is fixed to 8686."
+  type        = map(string)
+  default     = { NODE_ENV = "production" }
+  nullable    = false
 }
 variable "onify_helix_image" {
   default = "ghcr.io/onify/helix-app-lab:latest"
@@ -96,8 +122,17 @@ variable "onify_hub_api_external" {
 variable "onify_hub_functions_external" {
   default = false
 }
+variable "onify_hub_gateway_external" {
+  default = false
+}
 variable "onify_hub_agent_external" {
   default = true
+}
+variable "elasticsearch_legacy_storage" {
+  description = "Keep the Elasticsearch StatefulSet claim template and PV used by the consolidate branch."
+  type        = bool
+  default     = false
+  nullable    = false
 }
 variable "elasticsearch_address" {
   type    = string
@@ -187,6 +222,18 @@ variable "onify_hub_functions_memory_requests" {
   default = null
 }
 variable "onify_hub_functions_cpu_requests" {
+  default = null
+}
+variable "onify_hub_gateway_memory_limit" {
+  default = null
+}
+variable "onify_hub_gateway_cpu_limit" {
+  default = null
+}
+variable "onify_hub_gateway_memory_requests" {
+  default = null
+}
+variable "onify_hub_gateway_cpu_requests" {
   default = null
 }
 variable "onify_helix_memory_limit" {

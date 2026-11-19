@@ -1,10 +1,10 @@
 resource "kubernetes_persistent_volume" "local" {
-  count = var.elasticsearch_address != null || var.gke ? 0 : 1
+  count = var.elasticsearch_address == null && (!var.gke || var.elasticsearch_legacy_storage) ? 1 : 0
   metadata {
     name = "${local.client_code}-${local.onify_instance}-data"
   }
   spec {
-    storage_class_name = var.gke ? "" : "local"
+    storage_class_name = "local"
     capacity = {
       storage = var.elasticsearch_disksize
     }
@@ -73,7 +73,7 @@ resource "kubernetes_service" "elasticsearch" {
 }
 
 resource "kubernetes_persistent_volume_claim" "elasticsearch_data" {
-  count = var.elasticsearch_address != null ? 0 : 1
+  count = var.elasticsearch_address == null && !var.elasticsearch_legacy_storage ? 1 : 0
   metadata {
     name      = "${local.client_code}-${local.onify_instance}-data-${local.client_code}-${local.onify_instance}-elasticsearch-0"
     namespace = kubernetes_namespace.customer_namespace.metadata.0.name
@@ -217,10 +217,13 @@ resource "kubernetes_stateful_set" "elasticsearch" {
         }
         termination_grace_period_seconds = 300
 
-        volume {
-          name = "${local.client_code}-${local.onify_instance}-data"
-          persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.elasticsearch_data[0].metadata[0].name
+        dynamic "volume" {
+          for_each = kubernetes_persistent_volume_claim.elasticsearch_data
+          content {
+            name = "${local.client_code}-${local.onify_instance}-data"
+            persistent_volume_claim {
+              claim_name = volume.value.metadata[0].name
+            }
           }
         }
 
@@ -240,6 +243,24 @@ resource "kubernetes_stateful_set" "elasticsearch" {
 
       rolling_update {
         partition = 1
+      }
+    }
+
+    dynamic "volume_claim_template" {
+      for_each = var.elasticsearch_legacy_storage ? [1] : []
+      content {
+        metadata {
+          name = "${local.client_code}-${local.onify_instance}-data"
+        }
+        spec {
+          access_modes       = ["ReadWriteOnce"]
+          storage_class_name = var.gke ? "" : "local"
+          resources {
+            requests = {
+              storage = var.elasticsearch_disksize
+            }
+          }
+        }
       }
     }
   }
