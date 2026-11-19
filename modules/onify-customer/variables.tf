@@ -76,6 +76,12 @@ variable "deployment_replicas" {
 variable "gcr_registry_keyfile" {
   default = null
 }
+variable "onify_hub_functions_enabled" {
+  description = "Deploy the Hub Functions workload, services, and optional ingress."
+  type        = bool
+  default     = true
+  nullable    = false
+}
 variable "onify_hub_functions_image" {
   default = "eu.gcr.io/onify-images/hub/functions:latest"
 }
@@ -121,6 +127,12 @@ variable "onify_hub_gateway_external" {
 }
 variable "onify_hub_agent_external" {
   default = true
+}
+variable "elasticsearch_legacy_storage" {
+  description = "Keep the Elasticsearch StatefulSet claim template and PV used by the consolidate branch."
+  type        = bool
+  default     = false
+  nullable    = false
 }
 variable "elasticsearch_address" {
   type    = string

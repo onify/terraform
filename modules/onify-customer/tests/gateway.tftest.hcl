@@ -60,7 +60,7 @@ run "gateway_uses_functions_workload_and_service_pattern" {
     condition = (
       kubernetes_service_v1.onify-hub-gateway[0].metadata[0].name == "example-test-hub-gateway" &&
       kubernetes_service_v1.onify-hub-gateway[0].metadata[0].namespace == kubernetes_stateful_set.onify-hub-api.metadata[0].namespace &&
-      kubernetes_service_v1.onify-hub-gateway[0].metadata[0].annotations == kubernetes_service.onify-hub-functions.metadata[0].annotations &&
+      kubernetes_service_v1.onify-hub-gateway[0].metadata[0].annotations == kubernetes_service.onify-hub-functions[0].metadata[0].annotations &&
       kubernetes_service_v1.onify-hub-gateway[0].spec[0].type == "ClusterIP" &&
       kubernetes_service_v1.onify-hub-gateway[0].spec[0].selector == kubernetes_stateful_set.onify-hub-gateway[0].spec[0].template[0].metadata[0].labels &&
       kubernetes_service_v1.onify-hub-gateway[0].spec[0].port[0].port == 8686 &&
@@ -73,7 +73,7 @@ run "gateway_uses_functions_workload_and_service_pattern" {
     condition = (
       kubernetes_service_v1.onify-hub-gateway-alias[0].metadata[0].name == "hub-gateway" &&
       kubernetes_service_v1.onify-hub-gateway-alias[0].metadata[0].namespace == kubernetes_stateful_set.onify-hub-api.metadata[0].namespace &&
-      kubernetes_service_v1.onify-hub-gateway-alias[0].metadata[0].annotations == kubernetes_service.onify-hub-functions-alias.metadata[0].annotations &&
+      kubernetes_service_v1.onify-hub-gateway-alias[0].metadata[0].annotations == kubernetes_service.onify-hub-functions-alias[0].metadata[0].annotations &&
       kubernetes_service_v1.onify-hub-gateway-alias[0].spec[0].type == "ClusterIP" &&
       kubernetes_service_v1.onify-hub-gateway-alias[0].spec[0].selector == kubernetes_service_v1.onify-hub-gateway[0].spec[0].selector &&
       kubernetes_service_v1.onify-hub-gateway-alias[0].spec[0].port[0].port == 8686 &&
