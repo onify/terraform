@@ -160,6 +160,16 @@ variable "elasticsearch_cpu_requests" {
 variable "elasticsearch_version" {
   default = "7.17.29"
 }
+variable "elasticsearch_image_override" {
+  description = "Image for bundled Elasticsearch, for example a digest with repository plugins built for elasticsearch_version."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.elasticsearch_image_override == null ? true : trimspace(var.elasticsearch_image_override) != ""
+    error_message = "Set a non-empty Elasticsearch image reference or leave the override null."
+  }
+}
 variable "elasticsearch_xpack_security_enabled" {
   type    = bool
   default = false

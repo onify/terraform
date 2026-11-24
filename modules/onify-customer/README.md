@@ -63,6 +63,12 @@ existing StatefulSet owns the data claim template.
 
 # elasticsearch backup
 
+For a bundled Elasticsearch image with a repository plugin, set
+`elasticsearch_image_override` to the full image reference. Use a digest built
+for the configured `elasticsearch_version`. The Pod uses the module's existing
+`onify-regcred` pull secret when an override is set. The default image is
+`docker.elastic.co/elasticsearch/elasticsearch:<elasticsearch_version>`.
+
 ### prerequisites
 requires kubectl locally
 

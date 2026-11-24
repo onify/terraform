@@ -149,9 +149,15 @@ resource "kubernetes_stateful_set" "elasticsearch" {
           run_as_user     = 1000
           run_as_non_root = true
         }
+        dynamic "image_pull_secrets" {
+          for_each = var.elasticsearch_image_override == null ? [] : [kubernetes_secret.docker-onify.metadata[0].name]
+          content {
+            name = image_pull_secrets.value
+          }
+        }
         container {
           name              = "${local.client_code}-${local.onify_instance}-elasticsearch"
-          image             = "docker.elastic.co/elasticsearch/elasticsearch:${var.elasticsearch_version}"
+          image             = coalesce(var.elasticsearch_image_override, "docker.elastic.co/elasticsearch/elasticsearch:${var.elasticsearch_version}")
           image_pull_policy = "Always"
           port {
             name           = "nodes"
