@@ -5,7 +5,7 @@ locals {
 resource "kubernetes_deployment_v1" "onify-gateway" {
   metadata {
     name      = local.gateway_name
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app = local.gateway_name
     }
@@ -54,7 +54,7 @@ resource "kubernetes_deployment_v1" "onify-gateway" {
           }
 
           dynamic "env" {
-            for_each = merge(var.onify_gateway_envs, { PORT = "8686" })
+            for_each = merge(try(local.profile.gateway_envs, {}), var.onify_gateway_envs, { PORT = "8686" })
             content {
               name  = env.key
               value = env.value

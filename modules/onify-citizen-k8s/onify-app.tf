@@ -1,7 +1,7 @@
 resource "kubernetes_stateful_set" "onify-app" {
   metadata {
     name      = "${local.namespace}-app"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app = "${local.namespace}-app"
     }

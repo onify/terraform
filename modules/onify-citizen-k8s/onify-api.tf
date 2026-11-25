@@ -13,7 +13,7 @@ resource "kubernetes_config_map" "onify-api" {
 resource "kubernetes_stateful_set" "onify-api" {
   metadata {
     name      = "${local.namespace}-api"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app  = "${local.namespace}-api"
       name = "${local.namespace}-api"
@@ -55,14 +55,14 @@ resource "kubernetes_stateful_set" "onify-api" {
             container_port = 8181
           }
           dynamic "env" {
-            for_each = var.onify_api_envs
+            for_each = local.api_envs
             content {
               name  = env.key
               value = env.value
             }
           }
           dynamic "env_from" {
-            for_each = var.runtime_secrets.api[*]
+            for_each = local.api_runtime_secrets
             content {
               secret_ref { name = env_from.value }
             }

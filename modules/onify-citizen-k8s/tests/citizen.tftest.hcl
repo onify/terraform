@@ -68,3 +68,46 @@ run "instance_service_and_registry_credentials" {
     error_message = "Use the instance Elasticsearch Service and attach Google registry credentials to all four workloads."
   }
 }
+
+run "use_cluster_profile" {
+  command = plan
+  variables {
+    environment_profile   = "citizen-test"
+    elasticsearch_address = null
+    runtime_secrets       = {}
+    onify_api_envs = {
+      ONIFY_client_code          = "example", ONIFY_client_instance = "test"
+      ONIFY_initialLicense       = "fixture", ONIFY_adminUser_password = "fixture"
+      ONIFY_apiTokens_app_secret = "fixture", ONIFY_client_secret = "fixture"
+    }
+  }
+  override_data {
+    target = data.kubernetes_namespace.system[0]
+    values = { metadata = { name = "kube-system", uid = "test-cluster" } }
+  }
+  override_data {
+    target = data.kubernetes_config_map_v1.environment[0]
+    values = { data = { "profile.json" = <<-JSON
+      {
+        "cluster_uid":"test-cluster", "domain":"test.example", "storage_class":"dynamic",
+        "elasticsearch_image":"example/search:7", "gateway_name":"public", "gateway_namespace":"edge",
+        "gateway_daemonset":"edge-proxy", "acme_account_secret":"acme", "additional_https_exclusions":[],
+        "api_envs":{"NODE_ENV":"test"}
+      }
+    JSON
+    } }
+  }
+  override_module {
+    target          = module.environment[0]
+    override_during = plan
+    outputs         = { workload_namespace = "example-test", url = "https://example-test.test.example" }
+  }
+  assert {
+    condition = (
+      output.url == "https://example-test.test.example" && local.api_envs.NODE_ENV == "test" &&
+      !contains(keys(local.api_envs), "ONIFY_client_secret") &&
+      kubernetes_secret_v1.api_runtime[0].data.ONIFY_client_secret == "fixture"
+    )
+    error_message = "Load the cluster profile and store bootstrap credentials separately from pod settings."
+  }
+}
