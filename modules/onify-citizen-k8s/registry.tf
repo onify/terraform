@@ -3,7 +3,7 @@ resource "kubernetes_secret" "registry" {
 
   metadata {
     name      = "onify-regcred"
-    namespace = local.workload_namespace
+    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
   }
 
   type = "kubernetes.io/dockerconfigjson"

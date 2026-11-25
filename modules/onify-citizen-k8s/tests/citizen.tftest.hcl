@@ -21,7 +21,7 @@ run "plan_existing_cluster" {
 
   assert {
     condition = (
-      kubernetes_namespace.customer_namespace[0].metadata[0].name == "example-test" &&
+      kubernetes_namespace.customer_namespace.metadata[0].name == "example-test" &&
       kubernetes_config_map.onify-api.data.ONIFY_db_elasticsearch_host == var.elasticsearch_address &&
       alltrue([for pod in [
         kubernetes_stateful_set.onify-api.spec[0].template[0].spec[0],
@@ -66,20 +66,5 @@ run "instance_service_and_registry_credentials" {
       ] : pod.image_pull_secrets[0].name == "onify-regcred"])
     )
     error_message = "Use the instance Elasticsearch Service and attach Google registry credentials to all four workloads."
-  }
-}
-
-run "caller_owned_namespace" {
-  command = plan
-  variables {
-    create_namespace = false
-  }
-  assert {
-    condition = (
-      length(kubernetes_namespace.customer_namespace) == 0 &&
-      kubernetes_stateful_set.onify-api.metadata[0].namespace == "example-test" &&
-      kubernetes_service.onify-app.metadata[0].namespace == "example-test"
-    )
-    error_message = "Use the existing instance namespace for workloads and services."
   }
 }
