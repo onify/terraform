@@ -1,7 +1,7 @@
 resource "kubernetes_stateful_set" "onify-worker" {
   metadata {
     name      = "${local.namespace}-worker"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app  = "${local.namespace}-worker"
       name = "${local.namespace}-worker"
@@ -44,14 +44,14 @@ resource "kubernetes_stateful_set" "onify-worker" {
           }
           args = ["worker"]
           dynamic "env" {
-            for_each = var.onify_api_envs
+            for_each = local.api_envs
             content {
               name  = env.key
               value = env.value
             }
           }
           dynamic "env_from" {
-            for_each = var.runtime_secrets.api[*]
+            for_each = local.api_runtime_secrets
             content {
               secret_ref { name = env_from.value }
             }
