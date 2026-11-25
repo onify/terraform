@@ -10,6 +10,22 @@ variable "onify_app_image" {
   type = string
 }
 
+variable "custom_hostname" {
+  description = "Additional public hostnames for the cluster profile. On dev1, short labels and legacy names such as nacka.dev expand under both Onify domains."
+  type        = list(string)
+  default     = []
+  nullable    = false
+
+  validation {
+    condition = alltrue([for host in var.custom_hostname : try(
+      length(trimsuffix(host, ".")) <= 253 &&
+      alltrue([for label in split(".", trimsuffix(host, ".")) : can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$", label))]) &&
+      (!endswith(host, ".") || length(split(".", host)) >= 3), false
+    )])
+    error_message = "Use lowercase DNS labels or exact domain names, without wildcards, schemes, ports or paths."
+  }
+}
+
 variable "onify_worker_image" {
   type = string
 }

@@ -47,7 +47,8 @@ run "plan_existing_cluster" {
 }
 
 run "instance_service_and_registry_credentials" {
-  command = plan
+  # Applying with the mock provider also tests destruction during test teardown.
+  command = apply
 
   variables {
     elasticsearch_address = null
@@ -110,4 +111,16 @@ run "use_cluster_profile" {
     )
     error_message = "Load the cluster profile and store bootstrap credentials separately from pod settings."
   }
+}
+
+run "public_alias_requires_profile" {
+  command = plan
+  variables { custom_hostname = ["portal"] }
+  expect_failures = [kubernetes_namespace.customer_namespace]
+}
+
+run "reject_invalid_hostname" {
+  command = plan
+  variables { custom_hostname = ["https://portal.example.se/api"] }
+  expect_failures = [var.custom_hostname]
 }

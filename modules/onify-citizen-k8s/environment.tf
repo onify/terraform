@@ -34,10 +34,11 @@ locals {
 }
 
 module "environment" {
-  count     = var.environment_profile == null ? 0 : 1
-  source    = "./environment"
-  profile   = local.profile
-  namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+  count           = var.environment_profile == null ? 0 : 1
+  source          = "./environment"
+  profile         = local.profile
+  namespace       = kubernetes_namespace.customer_namespace.metadata[0].name
+  custom_hostname = var.custom_hostname
   backend = {
     name      = kubernetes_service.onify-app.metadata[0].name
     namespace = kubernetes_stateful_set.onify-app.metadata[0].namespace

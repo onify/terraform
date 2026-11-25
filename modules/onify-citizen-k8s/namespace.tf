@@ -7,7 +7,10 @@ resource "kubernetes_namespace" "customer_namespace" {
   depends_on = [data.kubernetes_config_map_v1.environment]
 
   lifecycle {
-    prevent_destroy = true
+    precondition {
+      condition     = var.environment_profile != null || length(var.custom_hostname) == 0
+      error_message = "Set environment_profile to configure public Citizen hostnames."
+    }
     precondition {
       condition = var.environment_profile == null || (
         can(regex("^[a-z][a-z0-9-]*[a-z0-9]$", local.namespace)) && length("${local.namespace}-elasticsearch") <= 63 &&
