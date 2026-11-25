@@ -5,7 +5,7 @@ locals {
 resource "kubernetes_deployment_v1" "onify-gateway" {
   metadata {
     name      = local.gateway_name
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app = local.gateway_name
     }
@@ -77,7 +77,7 @@ resource "kubernetes_service_v1" "onify-gateway" {
 
   metadata {
     name      = "onify-citizen-gateway"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app = local.gateway_name
     }

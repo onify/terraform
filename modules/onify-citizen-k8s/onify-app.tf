@@ -1,7 +1,7 @@
 resource "kubernetes_stateful_set" "onify-app" {
   metadata {
     name      = "${local.namespace}-app"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app = "${local.namespace}-app"
     }
@@ -63,7 +63,7 @@ resource "kubernetes_service" "onify-app" {
   lifecycle { create_before_destroy = true }
   metadata {
     name      = "onify-citizen-app"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
   }
   spec {
     selector = {

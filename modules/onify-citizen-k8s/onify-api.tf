@@ -1,7 +1,7 @@
 resource "kubernetes_config_map" "onify-api" {
   metadata {
     name      = "${local.namespace}-api"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
   }
 
   data = {
@@ -13,7 +13,7 @@ resource "kubernetes_config_map" "onify-api" {
 resource "kubernetes_stateful_set" "onify-api" {
   metadata {
     name      = "${local.namespace}-api"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
     labels = {
       app  = "${local.namespace}-api"
       name = "${local.namespace}-api"
@@ -83,7 +83,7 @@ resource "kubernetes_service" "onify-api" {
   lifecycle { create_before_destroy = true }
   metadata {
     name      = "onify-citizen-api"
-    namespace = kubernetes_namespace.customer_namespace.metadata[0].name
+    namespace = local.workload_namespace
   }
   spec {
     selector = {
