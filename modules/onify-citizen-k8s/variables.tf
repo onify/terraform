@@ -6,6 +6,18 @@ variable "onify_api_image" {
   type = string
 }
 
+variable "image_pull_policy" {
+  description = "Kubernetes image pull policy for the Citizen API, app, worker and gateway. Defaults to Always. Set to IfNotPresent or Never to override."
+  type        = string
+  default     = "Always"
+  nullable    = false
+
+  validation {
+    condition     = contains(["Always", "IfNotPresent", "Never"], var.image_pull_policy)
+    error_message = "Use Always, IfNotPresent or Never."
+  }
+}
+
 variable "onify_app_image" {
   type = string
 }

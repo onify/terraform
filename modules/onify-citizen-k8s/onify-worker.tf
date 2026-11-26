@@ -36,7 +36,7 @@ resource "kubernetes_stateful_set" "onify-worker" {
 
         container {
           image             = var.onify_worker_image
-          image_pull_policy = "IfNotPresent"
+          image_pull_policy = var.image_pull_policy
           name              = "onify-worker"
           port {
             name           = "worker"

@@ -38,7 +38,7 @@ resource "kubernetes_deployment_v1" "onify-gateway" {
         container {
           name              = "gateway"
           image             = var.onify_gateway_image
-          image_pull_policy = "IfNotPresent"
+          image_pull_policy = var.image_pull_policy
 
           readiness_probe {
             http_get {

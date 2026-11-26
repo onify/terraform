@@ -34,7 +34,7 @@ resource "kubernetes_stateful_set" "onify-app" {
         container {
           name              = "onify-app"
           image             = var.onify_app_image
-          image_pull_policy = "IfNotPresent"
+          image_pull_policy = var.image_pull_policy
           port {
             name           = "app"
             container_port = 4000

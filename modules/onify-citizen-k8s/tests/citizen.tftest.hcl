@@ -64,9 +64,9 @@ run "instance_service_and_registry_credentials" {
         kubernetes_stateful_set.onify-worker.spec[0].template[0].spec[0],
         kubernetes_stateful_set.onify-app.spec[0].template[0].spec[0],
         kubernetes_deployment_v1.onify-gateway.spec[0].template[0].spec[0]
-      ] : pod.image_pull_secrets[0].name == "onify-regcred"])
+      ] : pod.image_pull_secrets[0].name == "onify-regcred" && pod.container[0].image_pull_policy == "Always"])
     )
-    error_message = "Use the instance Elasticsearch Service and attach Google registry credentials to all four workloads."
+    error_message = "Use the instance Elasticsearch Service and apply the registry credentials and pull policy to all four workloads."
   }
 }
 
