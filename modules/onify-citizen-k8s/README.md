@@ -6,7 +6,7 @@ For an installation already running on GKE, start with [Migrate an existing GKE 
 
 ## Deploy a new instance on dev1
 
-The [standalone Terraform template](template/main.tf) pins the module revision, selects the dev1 cluster profile and uses the Citizen root-proxy app image. You need Terraform 1.6 or later in the 1.x series, access to the dev1 VPN, the `hostup-development` context in `~/.kube/dev1.config`, and a registry reader key for the private images.
+The [standalone Terraform template](template/main.tf) selects the dev1 cluster profile and uses the Citizen root-proxy app image. You need Terraform 1.6 or later in the 1.x series, access to the dev1 VPN and a registry reader key for the private images. The template defaults to the `hostup-development` context in `~/.kube/dev1.config`. To create a kubeconfig from a token or a client certificate and use it with Terraform, see [Connect to a Kubernetes cluster](KUBECONFIG.md).
 
 1. From the repository root, copy the template into a new directory dedicated to this instance. Keep that directory and its Terraform state for future updates and teardown. For an instance already managed on dev1, use its existing dev1 state.
 
